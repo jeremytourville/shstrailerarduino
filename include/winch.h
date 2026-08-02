@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "pins.h"
+#include "safe_timer.h"
 #include "types.h"
 
 namespace shstrailer {
@@ -25,7 +26,7 @@ class WinchController {
    private:
     WinchState m_state;
     WinchDirection m_requested;
-    uint32_t m_timer;
+    SafeTimer m_timer;
 
     void setOutputs(bool up, bool down);
 };

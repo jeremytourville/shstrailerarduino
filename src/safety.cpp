@@ -2,7 +2,7 @@
 
 namespace shstrailer {
 
-SafetyController::SafetyController() : m_ledTimer(0), m_ledState(false) {
+SafetyController::SafetyController() : m_ledState(false) {
     m_status.systemState = SystemState::STARTUP;
     m_status.battery = {0.0f, false, false};
 }
@@ -43,11 +43,10 @@ void SafetyController::updateStatusLED() {
         return;
     }
 
-    const uint32_t now = millis();
     const uint16_t interval = m_status.battery.critical ? 250 : 1000;
 
-    if ((now - m_ledTimer) >= interval) {
-        m_ledTimer = now;
+    if (m_ledTimer.elapsed() >= interval) {
+        m_ledTimer.start();
         m_ledState = !m_ledState;
         digitalWrite(STATUS_LED, m_ledState ? HIGH : LOW);
     }
