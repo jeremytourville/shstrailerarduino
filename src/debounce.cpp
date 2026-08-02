@@ -6,25 +6,24 @@ DebouncedButton::DebouncedButton(const uint8_t pin)
     : m_pin(pin),
       m_currentState(HIGH),
       m_previousState(HIGH),
-      m_pressEvent(false),
-      m_lastDebounceTime(0) {}
+      m_pressEvent(false) {}
 
 void DebouncedButton::begin() {
     pinMode(m_pin, INPUT_PULLUP);
     m_currentState = digitalRead(m_pin);
     m_previousState = m_currentState;
-    m_lastDebounceTime = millis();
+    m_timer.start();
 }
 
 void DebouncedButton::update() {
     const bool raw = digitalRead(m_pin);
 
     if (raw != m_previousState) {
-        m_lastDebounceTime = millis();
+        m_timer.start();
         m_previousState = raw;
     }
 
-    if ((millis() - m_lastDebounceTime) >= BUTTON_DEBOUNCE_MS) {
+    if (m_timer.elapsed() >= BUTTON_DEBOUNCE_MS) {
         if (raw != m_currentState) {
             m_currentState = raw;
             if (m_currentState == SWITCH_PRESSED) {

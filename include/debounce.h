@@ -3,6 +3,7 @@
 #include <Arduino.h>
 
 #include "config.h"
+#include "safe_timer.h"
 
 namespace shstrailer {
 
@@ -23,7 +24,7 @@ class DebouncedButton {
     bool m_currentState;
     bool m_previousState;
     bool m_pressEvent;
-    uint32_t m_lastDebounceTime;
+    SafeTimer m_timer;
 };
 
 }  // namespace shstrailer

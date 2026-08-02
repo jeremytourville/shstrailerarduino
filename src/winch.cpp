@@ -3,9 +3,7 @@
 namespace shstrailer {
 
 WinchController::WinchController()
-    : m_state(WinchState::IDLE),
-      m_requested(WinchDirection::STOP),
-      m_timer(0) {}
+    : m_state(WinchState::IDLE), m_requested(WinchDirection::STOP) {}
 
 void WinchController::begin() {
     pinMode(WINCH_UP_OUT, OUTPUT);
@@ -30,11 +28,11 @@ void WinchController::update() {
             if (m_requested == WinchDirection::UP) {
                 setOutputs(true, false);
                 m_state = WinchState::RUNNING_UP;
-                m_timer = millis();
+                m_timer.start();
             } else if (m_requested == WinchDirection::DOWN) {
                 setOutputs(false, true);
                 m_state = WinchState::RUNNING_DOWN;
-                m_timer = millis();
+                m_timer.start();
             }
             break;
 
@@ -45,8 +43,8 @@ void WinchController::update() {
             } else if (m_requested == WinchDirection::DOWN) {
                 setOutputs(false, false);
                 m_state = WinchState::DIRECTION_DELAY;
-                m_timer = millis();
-            } else if ((millis() - m_timer) > WINCH_MAX_RUNTIME_MS) {
+                m_timer.start();
+            } else if (m_timer.elapsed() > WINCH_MAX_RUNTIME_MS) {
                 setOutputs(false, false);
                 m_state = WinchState::FAULT;
             }
@@ -59,15 +57,15 @@ void WinchController::update() {
             } else if (m_requested == WinchDirection::UP) {
                 setOutputs(false, false);
                 m_state = WinchState::DIRECTION_DELAY;
-                m_timer = millis();
-            } else if ((millis() - m_timer) > WINCH_MAX_RUNTIME_MS) {
+                m_timer.start();
+            } else if (m_timer.elapsed() > WINCH_MAX_RUNTIME_MS) {
                 setOutputs(false, false);
                 m_state = WinchState::FAULT;
             }
             break;
 
         case WinchState::DIRECTION_DELAY:
-            if ((millis() - m_timer) >= WINCH_DIRECTION_DELAY) {
+            if (m_timer.elapsed() >= WINCH_DIRECTION_DELAY) {
                 m_state = WinchState::IDLE;
             }
             break;
