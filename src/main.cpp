@@ -1,14 +1,12 @@
 #include <Arduino.h>
 
 #include "config.h"
+#include "pins.h"
+#include "types.h"
 #include "debounce.h"
 #include "lighting.h"
-#include "pins.h"
-#include "safety.h"
-#include "types.h"
 #include "winch.h"
-
-using namespace shstrailer;
+#include "safety.h"
 
 DebouncedButton light1A(L1_SW_A);
 DebouncedButton light1B(L1_SW_B);
@@ -18,8 +16,10 @@ DebouncedButton light3A(L3_SW_A);
 DebouncedButton light3B(L3_SW_B);
 DebouncedButton light4A(L4_SW_A);
 DebouncedButton light4B(L4_SW_B);
+
 DebouncedButton ledStripButton(LED_STRIP_SW);
 DebouncedButton podLightButton(POD_LIGHT_SW);
+
 DebouncedButton winchUpButton(WINCH_UP_SW);
 DebouncedButton winchDownButton(WINCH_DN_SW);
 
@@ -34,10 +34,13 @@ void setup() {
         Serial.println(FW_NAME);
     }
 
+    // Initialize output-owning controllers first so outputs are immediately
+    // configured and forced to their safe OFF states.
     safety.begin();
     lighting.begin();
     winch.begin();
 
+    // Initialize all switch inputs.
     light1A.begin();
     light1B.begin();
     light2A.begin();
@@ -46,8 +49,10 @@ void setup() {
     light3B.begin();
     light4A.begin();
     light4B.begin();
+
     ledStripButton.begin();
     podLightButton.begin();
+
     winchUpButton.begin();
     winchDownButton.begin();
 
@@ -59,6 +64,7 @@ void setup() {
 }
 
 void loop() {
+    // Update all debounced inputs.
     light1A.update();
     light1B.update();
     light2A.update();
@@ -67,11 +73,14 @@ void loop() {
     light3B.update();
     light4A.update();
     light4B.update();
+
     ledStripButton.update();
     podLightButton.update();
+
     winchUpButton.update();
     winchDownButton.update();
 
+    // Lighting buttons are edge-triggered toggles.
     if (light1A.wasPressed() || light1B.wasPressed()) {
         lighting.toggle(LightCircuit::LIGHT1);
     }
@@ -96,15 +105,25 @@ void loop() {
         lighting.toggle(LightCircuit::POD_LIGHT);
     }
 
-    if (winchUpButton.isPressed()) {
+    // Winch is hold-to-run.
+    // If both direction buttons are pressed, command STOP.
+    const bool winchUpPressed = winchUpButton.isPressed();
+    const bool winchDownPressed = winchDownButton.isPressed();
+
+    if (winchUpPressed && !winchDownPressed) {
         winch.commandUp();
-    } else if (winchDownButton.isPressed()) {
+    }
+    else if (winchDownPressed && !winchUpPressed) {
         winch.commandDown();
-    } else {
+    }
+    else {
         winch.stop();
     }
 
     lighting.update();
     winch.update();
+
+    safety.setWinchFault(winch.isFaulted());
+    safety.setWinchCooldown(winch.isCoolingDown());
     safety.update();
 }
