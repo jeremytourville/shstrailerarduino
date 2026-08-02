@@ -1,24 +1,33 @@
-#ifndef WINCH_H
-#define WINCH_H
+#pragma once
+
 #include <Arduino.h>
+
 #include "config.h"
 #include "pins.h"
 #include "types.h"
 
+namespace shstrailer {
+
 class WinchController {
-public:
+   public:
     WinchController();
+
     void begin();
+
     void update();
+
     void commandUp();
+
     void commandDown();
+
     void stop();
 
-private:
+   private:
     WinchState m_state;
     WinchDirection m_requested;
     uint32_t m_timer;
+
     void setOutputs(bool up, bool down);
 };
 
-#endif
+}  // namespace shstrailer
