@@ -1,26 +1,24 @@
-#pragma once
+#ifndef LIGHTING_H
+#define LIGHTING_H
 
 #include <Arduino.h>
-
 #include "pins.h"
 #include "types.h"
 
-namespace shstrailer {
-
 class LightingController {
-   public:
+public:
     LightingController();
 
     void begin();
-
     void update();
 
     void toggle(LightCircuit light);
-
     void allOff();
 
-   private:
+    bool isOn(LightCircuit light) const;
+
+private:
     Light m_lights[(uint8_t)LightCircuit::COUNT];
 };
 
-}  // namespace shstrailer
+#endif

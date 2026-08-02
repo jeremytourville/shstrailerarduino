@@ -1,8 +1,7 @@
-#pragma once
+#ifndef TYPES_H
+#define TYPES_H
 
 #include <Arduino.h>
-
-namespace shstrailer {
 
 enum class LightCircuit : uint8_t {
     LIGHT1 = 0,
@@ -14,7 +13,11 @@ enum class LightCircuit : uint8_t {
     COUNT
 };
 
-enum class WinchDirection : uint8_t { STOP = 0, UP, DOWN };
+enum class WinchDirection : uint8_t {
+    STOP = 0,
+    UP,
+    DOWN
+};
 
 enum class WinchState : uint8_t {
     IDLE = 0,
@@ -24,7 +27,12 @@ enum class WinchState : uint8_t {
     FAULT
 };
 
-enum class SystemState : uint8_t { STARTUP = 0, READY, LOW_BATTERY, FAULT };
+enum class SystemState : uint8_t {
+    STARTUP = 0,
+    READY,
+    LOW_BATTERY,
+    FAULT
+};
 
 struct Light {
     uint8_t outputPin;
@@ -40,6 +48,8 @@ struct Battery {
 struct ControllerStatus {
     SystemState systemState;
     Battery battery;
+    bool winchFault;
+    bool winchCooldown;
 };
 
-}  // namespace shstrailer
+#endif

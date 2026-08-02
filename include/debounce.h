@@ -1,30 +1,25 @@
-#pragma once
+#ifndef DEBOUNCE_H
+#define DEBOUNCE_H
 
 #include <Arduino.h>
-
 #include "config.h"
-#include "safe_timer.h"
-
-namespace shstrailer {
 
 class DebouncedButton {
-   public:
+public:
     explicit DebouncedButton(uint8_t pin);
 
     void begin();
-
     void update();
 
-    [[nodiscard]] bool wasPressed();
+    bool wasPressed();
+    bool isPressed() const;
 
-    [[nodiscard]] bool isPressed() const;
-
-   private:
-    const uint8_t m_pin;
+private:
+    uint8_t m_pin;
     bool m_currentState;
     bool m_previousState;
     bool m_pressEvent;
-    SafeTimer m_timer;
+    uint32_t m_lastDebounceTime;
 };
 
-}  // namespace shstrailer
+#endif
