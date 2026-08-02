@@ -1,5 +1,7 @@
 #include "winch.h"
 
+namespace shstrailer {
+
 WinchController::WinchController()
     : m_state(WinchState::IDLE),
       m_requested(WinchDirection::STOP),
@@ -12,10 +14,12 @@ void WinchController::begin() {
 }
 
 void WinchController::commandUp() { m_requested = WinchDirection::UP; }
+
 void WinchController::commandDown() { m_requested = WinchDirection::DOWN; }
+
 void WinchController::stop() { m_requested = WinchDirection::STOP; }
 
-void WinchController::setOutputs(bool up, bool down) {
+void WinchController::setOutputs(const bool up, const bool down) {
     digitalWrite(WINCH_UP_OUT, up ? OUTPUT_ON : OUTPUT_OFF);
     digitalWrite(WINCH_DN_OUT, down ? OUTPUT_ON : OUTPUT_OFF);
 }
@@ -76,3 +80,5 @@ void WinchController::update() {
             break;
     }
 }
+
+}  // namespace shstrailer

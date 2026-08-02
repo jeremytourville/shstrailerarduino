@@ -1,5 +1,8 @@
 #include "lighting.h"
+
 #include "config.h"
+
+namespace shstrailer {
 
 LightingController::LightingController() {
     m_lights[(uint8_t)LightCircuit::LIGHT1] = {LIGHT1_OUT, false};
@@ -17,9 +20,9 @@ void LightingController::begin() {
     }
 }
 
-void LightingController::toggle(LightCircuit light) {
-    auto &l = m_lights[(uint8_t)light];
-    l.state = !l.state;
+void LightingController::toggle(const LightCircuit lightCircuit) {
+    auto& light = m_lights[(uint8_t)lightCircuit];
+    light.state = !light.state;
 }
 
 void LightingController::update() {
@@ -35,3 +38,5 @@ void LightingController::allOff() {
     }
     update();
 }
+
+}  // namespace shstrailer

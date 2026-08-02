@@ -1,12 +1,14 @@
 #include <Arduino.h>
 
 #include "config.h"
-#include "pins.h"
-#include "types.h"
 #include "debounce.h"
 #include "lighting.h"
-#include "winch.h"
+#include "pins.h"
 #include "safety.h"
+#include "types.h"
+#include "winch.h"
+
+using namespace shstrailer;
 
 DebouncedButton light1A(L1_SW_A);
 DebouncedButton light1B(L1_SW_B);
@@ -70,23 +72,29 @@ void loop() {
     winchUpButton.update();
     winchDownButton.update();
 
-    if (light1A.wasPressed() || light1B.wasPressed())
+    if (light1A.wasPressed() || light1B.wasPressed()) {
         lighting.toggle(LightCircuit::LIGHT1);
+    }
 
-    if (light2A.wasPressed() || light2B.wasPressed())
+    if (light2A.wasPressed() || light2B.wasPressed()) {
         lighting.toggle(LightCircuit::LIGHT2);
+    }
 
-    if (light3A.wasPressed() || light3B.wasPressed())
+    if (light3A.wasPressed() || light3B.wasPressed()) {
         lighting.toggle(LightCircuit::LIGHT3);
+    }
 
-    if (light4A.wasPressed() || light4B.wasPressed())
+    if (light4A.wasPressed() || light4B.wasPressed()) {
         lighting.toggle(LightCircuit::LIGHT4);
+    }
 
-    if (ledStripButton.wasPressed())
+    if (ledStripButton.wasPressed()) {
         lighting.toggle(LightCircuit::LED_STRIP);
+    }
 
-    if (podLightButton.wasPressed())
+    if (podLightButton.wasPressed()) {
         lighting.toggle(LightCircuit::POD_LIGHT);
+    }
 
     if (winchUpButton.isPressed()) {
         winch.commandUp();

@@ -1,7 +1,8 @@
 #include "safety.h"
 
-SafetyController::SafetyController()
-    : m_ledTimer(0), m_ledState(false) {
+namespace shstrailer {
+
+SafetyController::SafetyController() : m_ledTimer(0), m_ledState(false) {
     m_status.systemState = SystemState::STARTUP;
     m_status.battery = {0.0f, false, false};
 }
@@ -27,9 +28,10 @@ void SafetyController::safeStartup() {
 }
 
 void SafetyController::readBattery() {
-    uint16_t adc = analogRead(BATTERY_VOLTAGE_PIN);
-    float vPin = (adc * ADC_REFERENCE_VOLTAGE) / ADC_MAX_COUNTS;
-    float vBatt = vPin * ((VOLTAGE_DIVIDER_R1 + VOLTAGE_DIVIDER_R2) / VOLTAGE_DIVIDER_R2);
+    const uint16_t adc = analogRead(BATTERY_VOLTAGE_PIN);
+    const float vPin = (adc * ADC_REFERENCE_VOLTAGE) / ADC_MAX_COUNTS;
+    const float vBatt =
+        vPin * ((VOLTAGE_DIVIDER_R1 + VOLTAGE_DIVIDER_R2) / VOLTAGE_DIVIDER_R2);
 
     m_status.battery.voltage = vBatt;
     m_status.battery.warning = (vBatt <= BATTERY_WARNING_VOLT);
@@ -37,10 +39,12 @@ void SafetyController::readBattery() {
 }
 
 void SafetyController::updateStatusLED() {
-    if (!ENABLE_STATUS_LED) return;
+    if (!ENABLE_STATUS_LED) {
+        return;
+    }
 
-    uint32_t now = millis();
-    uint16_t interval = m_status.battery.critical ? 250 : 1000;
+    const uint32_t now = millis();
+    const uint16_t interval = m_status.battery.critical ? 250 : 1000;
 
     if ((now - m_ledTimer) >= interval) {
         m_ledTimer = now;
@@ -53,5 +57,8 @@ void SafetyController::update() {
     if (ENABLE_BATTERY_MONITOR) {
         readBattery();
     }
+
     updateStatusLED();
 }
+
+}  // namespace shstrailer
