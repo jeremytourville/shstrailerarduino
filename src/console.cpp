@@ -66,6 +66,14 @@ Console& operator<<(Console& console, const double value) {
     return console;
 }
 
+Console& operator<<(Console& console, const char* const str) {
+    if (ENABLE_SERIAL_DEBUG) {
+        Serial.print(str);
+    }
+
+    return console;
+}
+
 Console& operator<<(Console& console, const __FlashStringHelper* const str) {
     if (ENABLE_SERIAL_DEBUG) {
         Serial.print(str);

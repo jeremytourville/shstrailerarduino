@@ -30,6 +30,8 @@ class Console {
 
     friend Console& operator<<(Console& console, const double value);
 
+    friend Console& operator<<(Console& console, const char* const str);
+
     friend Console& operator<<(Console& console,
                                const __FlashStringHelper* const str);
 

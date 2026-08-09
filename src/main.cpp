@@ -9,6 +9,7 @@
 #include "pins.h"
 #include "safety.h"
 #include "types.h"
+#include "version.h"
 #include "winch.h"
 
 using namespace shstrailer;
@@ -53,7 +54,7 @@ WinchController winch;
 SafetyController safety;
 
 void setup() {
-    cout << endl << FW_NAME << endl;
+    cout << endl << FW_NAME << " " << GetVersionString() << endl;
 
     // Initialize output-owning controllers first so outputs are immediately
     // configured and forced to their safe OFF states.
