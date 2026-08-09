@@ -2,8 +2,7 @@
 
 namespace shstrailer {
 
-SafetyController::SafetyController()
-    : m_ledTimer(0), m_batteryTimer(0), m_ledState(false) {
+SafetyController::SafetyController() : m_ledState(false) {
     m_status.systemState = SystemState::STARTUP;
     m_status.battery = {0.0f, false, false};
     m_status.winchFault = false;
@@ -15,8 +14,8 @@ void SafetyController::begin() {
     digitalWrite(STATUS_LED, LOW);
 
     m_ledState = false;
-    m_ledTimer = millis();
-    m_batteryTimer = 0;
+    m_ledTimer.start();
+    m_batteryTimer.start();
 }
 
 void SafetyController::safeStartup() {
@@ -87,8 +86,6 @@ void SafetyController::updateStatusLED() {
         return;
     }
 
-    const uint32_t now = millis();
-
     switch (m_status.systemState) {
         case SystemState::STARTUP:
             // LED off during startup lockout.
@@ -99,8 +96,8 @@ void SafetyController::updateStatusLED() {
         case SystemState::READY:
             // Slow heartbeat: short visual activity without looking like an
             // alarm.
-            if ((uint32_t)(now - m_ledTimer) >= 1000UL) {
-                m_ledTimer = now;
+            if (m_ledTimer.elapsed() >= 1000UL) {
+                m_ledTimer.start();
                 m_ledState = !m_ledState;
                 digitalWrite(STATUS_LED, m_ledState ? HIGH : LOW);
             }
@@ -108,8 +105,8 @@ void SafetyController::updateStatusLED() {
 
         case SystemState::LOW_BATTERY:
             // Faster blink for critical battery voltage.
-            if ((uint32_t)(now - m_ledTimer) >= 250UL) {
-                m_ledTimer = now;
+            if (m_ledTimer.elapsed() >= 250UL) {
+                m_ledTimer.start();
                 m_ledState = !m_ledState;
                 digitalWrite(STATUS_LED, m_ledState ? HIGH : LOW);
             }
@@ -117,8 +114,8 @@ void SafetyController::updateStatusLED() {
 
         case SystemState::FAULT:
             // Very fast blink for winch/runtime fault.
-            if ((uint32_t)(now - m_ledTimer) >= 100UL) {
-                m_ledTimer = now;
+            if (m_ledTimer.elapsed() >= 100UL) {
+                m_ledTimer.start();
                 m_ledState = !m_ledState;
                 digitalWrite(STATUS_LED, m_ledState ? HIGH : LOW);
             }
@@ -127,11 +124,9 @@ void SafetyController::updateStatusLED() {
 }
 
 void SafetyController::update() {
-    const uint32_t now = millis();
-
     if (ENABLE_BATTERY_MONITOR &&
-        (uint32_t)(now - m_batteryTimer) >= BATTERY_SAMPLE_INTERVAL_MS) {
-        m_batteryTimer = now;
+        m_batteryTimer.elapsed() >= BATTERY_SAMPLE_INTERVAL_MS) {
+        m_batteryTimer.start();
         readBattery();
     }
 
