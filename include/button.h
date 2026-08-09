@@ -25,7 +25,7 @@ class Button {
     void notifyLongPressed();
 
     static constexpr Timer::Stamp kDebounceDuration = 30;
-    static constexpr Timer::Stamp kLongPressDuration = 3000;
+    static constexpr Timer::Stamp kLongPressDuration = 2000;
 
     Vector<ButtonObserver*> observers_;
     Timer debounceTimer_;
