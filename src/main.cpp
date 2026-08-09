@@ -1,8 +1,10 @@
 #include <Arduino.h>
 
+#include "array.h"
+#include "button.h"
 #include "config.h"
-#include "debounce.h"
-#include "lighting.h"
+#include "light.h"
+#include "light_controller.h"
 #include "pins.h"
 #include "safety.h"
 #include "types.h"
@@ -10,28 +12,48 @@
 
 using namespace shstrailer;
 
-DebouncedButton light1A(L1_SW_A);
-DebouncedButton light1B(L1_SW_B);
-DebouncedButton light2A(L2_SW_A);
-DebouncedButton light2B(L2_SW_B);
-DebouncedButton light3A(L3_SW_A);
-DebouncedButton light3B(L3_SW_B);
-DebouncedButton light4A(L4_SW_A);
-DebouncedButton light4B(L4_SW_B);
+//
+// Buttons
+//
+Button button1A(L1_SW_A);
+Button button1B(L1_SW_B);
+Button button2A(L2_SW_A);
+Button button2B(L2_SW_B);
+Button button3A(L3_SW_A);
+Button button3B(L3_SW_B);
+Button button4A(L4_SW_A);
+Button button4B(L4_SW_B);
 
-DebouncedButton ledStripButton(LED_STRIP_SW);
-DebouncedButton podLightButton(POD_LIGHT_SW);
+Button ledStripButton(LED_STRIP_SW);
+Button podLightButton(POD_LIGHT_SW);
 
-DebouncedButton winchUpButton(WINCH_UP_SW);
-DebouncedButton winchDownButton(WINCH_DN_SW);
+Button winchUpButton(WINCH_UP_SW);
+Button winchDownButton(WINCH_DN_SW);
 
-LightingController lighting;
+Array<Button*, 10> allButtons = {
+    &button1A, &button1B, &button2A, &button2B,       &button3A,
+    &button3B, &button4A, &button4B, &ledStripButton, &podLightButton};
+
+//
+// Lights
+//
+Light light1(LIGHT1_OUT);
+Light light2(LIGHT2_OUT);
+Light light3(LIGHT3_OUT);
+Light light4(LIGHT4_OUT);
+Light ledStrip(LED_STRIP_OUT);
+Light podLight(POD_LIGHT_OUT);
+
+Array<Light*, 6> allLights = {&light1, &light2,   &light3,
+                              &light4, &ledStrip, &podLight};
+
+LightController lightController;
 WinchController winch;
 SafetyController safety;
 
 void setup() {
     if (ENABLE_SERIAL_DEBUG) {
-        Serial.begin(SERIAL_BAUD_RATE);
+        Serial.begin(SERIAL_BAUD);
         Serial.println();
         Serial.println(FW_NAME);
     }
@@ -39,26 +61,32 @@ void setup() {
     // Initialize output-owning controllers first so outputs are immediately
     // configured and forced to their safe OFF states.
     safety.begin();
-    lighting.begin();
     winch.begin();
 
-    // Initialize all switch inputs.
-    light1A.begin();
-    light1B.begin();
-    light2A.begin();
-    light2B.begin();
-    light3A.begin();
-    light3B.begin();
-    light4A.begin();
-    light4B.begin();
+    for (auto light : allLights) {
+        lightController.registerLight(light);
+    }
 
-    ledStripButton.begin();
-    podLightButton.begin();
-
-    winchUpButton.begin();
-    winchDownButton.begin();
+    lightController.off();
 
     safety.safeStartup();
+
+    // map buttons to lights
+    button1A.registerObserver(&light1);
+    button1B.registerObserver(&light1);
+    button2A.registerObserver(&light2);
+    button2B.registerObserver(&light2);
+    button3A.registerObserver(&light3);
+    button3B.registerObserver(&light3);
+    button4A.registerObserver(&light4);
+    button4B.registerObserver(&light4);
+    ledStripButton.registerObserver(&ledStrip);
+    podLightButton.registerObserver(&podLight);
+
+    // register the light controller to turn off all lights on long press
+    for (auto button : allButtons) {
+        button->registerObserver(&lightController);
+    }
 
     if (ENABLE_SERIAL_DEBUG) {
         Serial.println(F("System Ready"));
@@ -66,45 +94,9 @@ void setup() {
 }
 
 void loop() {
-    // Update all debounced inputs.
-    light1A.update();
-    light1B.update();
-    light2A.update();
-    light2B.update();
-    light3A.update();
-    light3B.update();
-    light4A.update();
-    light4B.update();
-
-    ledStripButton.update();
-    podLightButton.update();
-
-    winchUpButton.update();
-    winchDownButton.update();
-
-    // Lighting buttons are edge-triggered toggles.
-    if (light1A.wasPressed() || light1B.wasPressed()) {
-        lighting.toggle(LightCircuit::LIGHT1);
-    }
-
-    if (light2A.wasPressed() || light2B.wasPressed()) {
-        lighting.toggle(LightCircuit::LIGHT2);
-    }
-
-    if (light3A.wasPressed() || light3B.wasPressed()) {
-        lighting.toggle(LightCircuit::LIGHT3);
-    }
-
-    if (light4A.wasPressed() || light4B.wasPressed()) {
-        lighting.toggle(LightCircuit::LIGHT4);
-    }
-
-    if (ledStripButton.wasPressed()) {
-        lighting.toggle(LightCircuit::LED_STRIP);
-    }
-
-    if (podLightButton.wasPressed()) {
-        lighting.toggle(LightCircuit::POD_LIGHT);
+    // Update all buttons.
+    for (auto button : allButtons) {
+        button->update();
     }
 
     // Winch is hold-to-run.
@@ -120,7 +112,6 @@ void loop() {
         winch.stop();
     }
 
-    lighting.update();
     winch.update();
 
     safety.setWinchFault(winch.isFaulted());

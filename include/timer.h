@@ -6,18 +6,20 @@ namespace shstrailer {
 A simple timer class that wraps the Arduino millis() function, and handles
 the case where millis() wraps around after ~50 days.
 */
-class SafeTimer {
+class Timer {
    public:
-    SafeTimer();
+    using Stamp = unsigned long;
+
+    Timer();
 
     // captures the current time as the start time for the timer.
     void start();
 
     // return elapsed time in milliseconds, since start() was called.
-    [[nodiscard]] unsigned long elapsed() const;
+    [[nodiscard]] Stamp elapsed() const;
 
    private:
-    unsigned long m_startTime;
+    Stamp m_startTime;
 };
 
 }  // namespace shstrailer

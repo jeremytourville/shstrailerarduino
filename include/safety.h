@@ -4,7 +4,7 @@
 
 #include "config.h"
 #include "pins.h"
-#include "safe_timer.h"
+#include "timer.h"
 #include "types.h"
 
 namespace shstrailer {
@@ -25,8 +25,8 @@ class SafetyController {
    private:
     ControllerStatus m_status;
 
-    SafeTimer m_ledTimer;
-    SafeTimer m_batteryTimer;
+    Timer m_ledTimer;
+    Timer m_batteryTimer;
 
     bool m_ledState;
 
