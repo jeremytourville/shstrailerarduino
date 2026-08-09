@@ -40,6 +40,8 @@ struct Battery {
 struct ControllerStatus {
     SystemState systemState;
     Battery battery;
+    bool winchFault;
+    bool winchCooldown;
 };
 
 }  // namespace shstrailer

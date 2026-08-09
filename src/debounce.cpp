@@ -2,16 +2,19 @@
 
 namespace shstrailer {
 
-DebouncedButton::DebouncedButton(const uint8_t pin)
+DebouncedButton::DebouncedButton(uint8_t pin)
     : m_pin(pin),
-      m_currentState(HIGH),
-      m_previousState(HIGH),
+      m_currentState(SWITCH_RELEASED),
+      m_previousState(SWITCH_RELEASED),
       m_pressEvent(false) {}
 
 void DebouncedButton::begin() {
     pinMode(m_pin, INPUT_PULLUP);
-    m_currentState = digitalRead(m_pin);
-    m_previousState = m_currentState;
+
+    const bool initialState = digitalRead(m_pin);
+    m_currentState = initialState;
+    m_previousState = initialState;
+    m_pressEvent = false;
     m_timer.start();
 }
 
@@ -19,13 +22,14 @@ void DebouncedButton::update() {
     const bool raw = digitalRead(m_pin);
 
     if (raw != m_previousState) {
-        m_timer.start();
         m_previousState = raw;
+        m_timer.start();
     }
 
     if (m_timer.elapsed() >= BUTTON_DEBOUNCE_MS) {
         if (raw != m_currentState) {
             m_currentState = raw;
+
             if (m_currentState == SWITCH_PRESSED) {
                 m_pressEvent = true;
             }
@@ -34,14 +38,13 @@ void DebouncedButton::update() {
 }
 
 bool DebouncedButton::wasPressed() {
-    const bool pressEventLocal = m_pressEvent;
+    const bool event = m_pressEvent;
     m_pressEvent = false;
-
-    return pressEventLocal;
+    return event;
 }
 
 bool DebouncedButton::isPressed() const {
-    return SWITCH_PRESSED == m_currentState;
+    return m_currentState == SWITCH_PRESSED;
 }
 
 }  // namespace shstrailer

@@ -19,6 +19,8 @@ class LightingController {
 
     void allOff();
 
+    [[nodiscard]] bool isOn(LightCircuit light) const;
+
    private:
     Light m_lights[(uint8_t)LightCircuit::COUNT];
 };

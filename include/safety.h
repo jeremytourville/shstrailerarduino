@@ -14,16 +14,24 @@ class SafetyController {
     SafetyController();
 
     void begin();
-
     void update();
-
     void safeStartup();
+
+    void setWinchFault(bool faulted);
+    void setWinchCooldown(bool coolingDown);
+
+    const ControllerStatus& status() const;
 
    private:
     ControllerStatus m_status;
+
     SafeTimer m_ledTimer;
+    SafeTimer m_batteryTimer;
+
     bool m_ledState;
+
     void readBattery();
+    void updateSystemState();
     void updateStatusLED();
 };
 

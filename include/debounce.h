@@ -24,6 +24,7 @@ class DebouncedButton {
     bool m_currentState;
     bool m_previousState;
     bool m_pressEvent;
+
     SafeTimer m_timer;
 };
 

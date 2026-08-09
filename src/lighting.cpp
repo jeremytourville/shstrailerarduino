@@ -17,12 +17,18 @@ void LightingController::begin() {
     for (uint8_t i = 0; i < (uint8_t)LightCircuit::COUNT; ++i) {
         pinMode(m_lights[i].outputPin, OUTPUT);
         digitalWrite(m_lights[i].outputPin, OUTPUT_OFF);
+        m_lights[i].state = false;
     }
 }
 
-void LightingController::toggle(const LightCircuit lightCircuit) {
-    auto& light = m_lights[(uint8_t)lightCircuit];
-    light.state = !light.state;
+void LightingController::toggle(LightCircuit light) {
+    const uint8_t index = (uint8_t)light;
+
+    if (index >= (uint8_t)LightCircuit::COUNT) {
+        return;
+    }
+
+    m_lights[index].state = !m_lights[index].state;
 }
 
 void LightingController::update() {
@@ -36,7 +42,18 @@ void LightingController::allOff() {
     for (uint8_t i = 0; i < (uint8_t)LightCircuit::COUNT; ++i) {
         m_lights[i].state = false;
     }
+
     update();
+}
+
+bool LightingController::isOn(LightCircuit light) const {
+    const uint8_t index = (uint8_t)light;
+
+    if (index >= (uint8_t)LightCircuit::COUNT) {
+        return false;
+    }
+
+    return m_lights[index].state;
 }
 
 }  // namespace shstrailer
