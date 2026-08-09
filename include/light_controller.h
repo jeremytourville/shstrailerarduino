@@ -1,15 +1,14 @@
 #pragma once
 
 #include "button_observer.hpp"
+#include "light.h"
 #include "vector.h"
 
 namespace shstrailer {
 
-class Light;
-
 class LightController : public ButtonObserver {
    public:
-    void registerLight(Light* light);
+    void registerLight(uint8_t pin);
 
     void onLongPressed(uint8_t pin) override;
 
@@ -18,7 +17,7 @@ class LightController : public ButtonObserver {
     [[nodiscard]] Light* getLightByPin(uint8_t pin);
 
    private:
-    Vector<Light*> lights_;
+    Vector<Light, 6> lights_;
 };
 
 }  // namespace shstrailer

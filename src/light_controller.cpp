@@ -4,12 +4,8 @@
 
 namespace shstrailer {
 
-void LightController::registerLight(Light* light) {
-    if (nullptr == light) {
-        Abort(F("light is nullptr"));
-    }
-
-    lights_.push_back(light);
+void LightController::registerLight(const uint8_t pin) {
+    lights_.emplace_back(pin);
 }
 
 void LightController::onLongPressed([[maybe_unused]] const uint8_t pin) {
@@ -17,15 +13,15 @@ void LightController::onLongPressed([[maybe_unused]] const uint8_t pin) {
 }
 
 void LightController::off() {
-    for (auto light : lights_) {
-        light->off();
+    for (auto& light : lights_) {
+        light.off();
     }
 }
 
 Light* LightController::getLightByPin(const uint8_t pin) {
-    for (auto light : lights_) {
-        if (light->getPin() == pin) {
-            return light;
+    for (auto& light : lights_) {
+        if (light.getPin() == pin) {
+            return &light;
         }
     }
 
