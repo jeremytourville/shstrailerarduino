@@ -15,6 +15,12 @@ void FrameRateMonitor::update() {
 }
 
 float FrameRateMonitor::framesPerSecond() const {
+    const auto elapsed = timer_.elapsed();
+
+    if (elapsed == 0) {
+        return 0.0f;
+    }
+
     return count_ / (timer_.elapsed() / 1000.0f);
 }
 
