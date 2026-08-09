@@ -46,6 +46,10 @@ void Button::update() {
 }
 
 void Button::registerObserver(ButtonObserver* observer) {
+    if (nullptr == observer) {
+        Abort(F("observer is nullptr"));
+    }
+
     observers_.push_back(observer);
 }
 

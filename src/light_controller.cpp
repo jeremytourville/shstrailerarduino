@@ -4,7 +4,13 @@
 
 namespace shstrailer {
 
-void LightController::registerLight(Light* light) { lights_.push_back(light); }
+void LightController::registerLight(Light* light) {
+    if (nullptr == light) {
+        Abort(F("light is nullptr"));
+    }
+
+    lights_.push_back(light);
+}
 
 void LightController::onLongPressed() { off(); }
 

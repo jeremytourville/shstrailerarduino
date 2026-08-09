@@ -6,7 +6,11 @@
 
 namespace shstrailer {
 
-template <typename T, const uint16_t N = 64>
+//
+// The N template paramter is the maximum number of elements that can be stored
+// in the vector, and also can contribute to RAM size on arduino.
+//
+template <typename T, const uint16_t N = 16>
 class Vector {
    public:
     [[nodiscard]] T& at(const size_t index) {
@@ -63,8 +67,8 @@ class Vector {
         }
     }
 
-    uint16_t size_ = 0;
     T data_[N];
+    uint16_t size_ = 0;
 };
 
 }  // namespace shstrailer

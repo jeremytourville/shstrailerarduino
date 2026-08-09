@@ -27,13 +27,13 @@ class Button {
     static constexpr Timer::Stamp kDebounceDuration = 30;
     static constexpr Timer::Stamp kLongPressDuration = 3000;
 
-    const uint8_t pin_;
+    Vector<ButtonObserver*> observers_;
     Timer debounceTimer_;
     Timer longPressTimer_;
-    bool longPressPending_ = false;
     int state_;
     int lastState_;
-    Vector<ButtonObserver*> observers_;
+    const uint8_t pin_;
+    bool longPressPending_ = false;
 };
 
 }  // namespace shstrailer
