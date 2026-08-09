@@ -80,6 +80,14 @@ class Vector {
         I* const* ptr_;
     };
 
+    Vector() = default;
+    Vector(const Vector&) = delete;
+    Vector(Vector&&) = delete;
+    Vector& operator=(const Vector&) = delete;
+    Vector& operator=(Vector&&) = delete;
+
+    ~Vector() { clear(); }
+
     template <typename... Args>
     void emplace_back(Args&&... args) {
         AbortIfOverflow();
@@ -91,7 +99,7 @@ class Vector {
     void emplace_back(T&& value) {
         AbortIfOverflow();
 
-        data_[size_] = allocator_.allocate(value);
+        data_[size_] = allocator_.allocate(forward<T>(value));
         ++size_;
     }
 
@@ -105,7 +113,7 @@ class Vector {
     void push_back(T&& value) {
         AbortIfOverflow();
 
-        data_[size_] = allocator_.allocate(value);
+        data_[size_] = allocator_.allocate(forward<T>(value));
         ++size_;
     }
 
@@ -160,6 +168,7 @@ class Vector {
         }
 
         size_ = 0;
+        allocator_.clear();
     }
 
     [[nodiscard]] const_reference back() const { return *data_[size_ - 1]; }

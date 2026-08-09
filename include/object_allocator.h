@@ -14,9 +14,7 @@ class ObjectAllocator {
    public:
     template <typename... Args>
     [[nodiscard]] T* allocate(Args&&... args) {
-        if (allocatedCount_ >= N) {
-            Abort(F("ObjectAllocator overflow"));
-        }
+        AbortIfOverflow();
 
         T* obj =
             new (buffer_[allocatedCount_].storage) T(forward<Args>(args)...);
@@ -25,7 +23,24 @@ class ObjectAllocator {
         return obj;
     }
 
+    [[nodiscard]] T* allocate(T&& value) {
+        AbortIfOverflow();
+
+        T* obj = new (buffer_[allocatedCount_].storage) T(forward<T>(value));
+        ++allocatedCount_;
+
+        return obj;
+    }
+
+    void clear() { allocatedCount_ = 0; }
+
    private:
+    void AbortIfOverflow() {
+        if (allocatedCount_ >= N) {
+            Abort(F("ObjectAllocator overflow"));
+        }
+    }
+
     struct Slot {
         alignas(T) uint8_t storage[sizeof(T)];
     };
