@@ -19,7 +19,7 @@ class Timer {
     [[nodiscard]] Stamp elapsed() const;
 
    private:
-    Stamp m_startTime;
+    Stamp startTime_;
 };
 
 }  // namespace shstrailer

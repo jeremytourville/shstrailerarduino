@@ -55,13 +55,13 @@ void Button::registerObserver(ButtonObserver* observer) {
 
 void Button::notifyPressed() {
     for (auto observer : observers_) {
-        observer->onPressed();
+        observer->onPressed(pin_);
     }
 }
 
 void Button::notifyLongPressed() {
     for (auto observer : observers_) {
-        observer->onLongPressed();
+        observer->onLongPressed(pin_);
     }
 }
 

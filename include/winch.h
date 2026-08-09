@@ -2,13 +2,14 @@
 
 #include <Arduino.h>
 
+#include "button_observer.hpp"
 #include "config.h"
 #include "pins.h"
 #include "types.h"
 
 namespace shstrailer {
 
-class WinchController {
+class WinchController : public ButtonObserver {
    public:
     WinchController();
     void begin();
@@ -20,6 +21,8 @@ class WinchController {
     bool isCoolingDown() const;
     WinchState state() const;
     uint32_t cooldownRemainingMs() const;
+
+    void onPressed(uint8_t pin) override;
 
    private:
     WinchState m_state;

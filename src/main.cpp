@@ -5,6 +5,7 @@
 #include "button.h"
 #include "config.h"
 #include "console.h"
+#include "frame_rate_monitor.h"
 #include "light.h"
 #include "light_controller.h"
 #include "object_allocator.h"
@@ -22,21 +23,12 @@ using namespace shstrailer;
 //
 ObjectAllocator<Button, 12> buttonAllocator;
 
-Button* winchUpButton = nullptr;
-Button* winchDownButton = nullptr;
 Vector<Button*> allButtons;
 
 //
 // Lights
 //
 ObjectAllocator<Light, 6> lightAllocator;
-
-Light* light1 = nullptr;
-Light* light2 = nullptr;
-Light* light3 = nullptr;
-Light* light4 = nullptr;
-Light* ledStrip = nullptr;
-Light* podLight = nullptr;
 
 //
 // Controllers
@@ -45,56 +37,55 @@ LightController lightController;
 WinchController winch;
 SafetyController safety;
 
+FrameRateMonitor frameRateMonitor;
+
 void initializeLights(LightController& lightControllerLocal) {
-    light1 = lightAllocator.allocate(LIGHT1_OUT);
-    lightControllerLocal.registerLight(light1);
-
-    light2 = lightAllocator.allocate(LIGHT2_OUT);
-    lightControllerLocal.registerLight(light2);
-
-    light3 = lightAllocator.allocate(LIGHT3_OUT);
-    lightControllerLocal.registerLight(light3);
-
-    light4 = lightAllocator.allocate(LIGHT4_OUT);
-    lightControllerLocal.registerLight(light4);
-
-    ledStrip = lightAllocator.allocate(LED_STRIP_OUT);
-    lightControllerLocal.registerLight(ledStrip);
-
-    podLight = lightAllocator.allocate(POD_LIGHT_OUT);
-    lightControllerLocal.registerLight(podLight);
+    lightControllerLocal.registerLight(lightAllocator.allocate(LIGHT1_OUT));
+    lightControllerLocal.registerLight(lightAllocator.allocate(LIGHT2_OUT));
+    lightControllerLocal.registerLight(lightAllocator.allocate(LIGHT3_OUT));
+    lightControllerLocal.registerLight(lightAllocator.allocate(LIGHT4_OUT));
+    lightControllerLocal.registerLight(lightAllocator.allocate(LED_STRIP_OUT));
+    lightControllerLocal.registerLight(lightAllocator.allocate(POD_LIGHT_OUT));
 }
 
-void initializeButtons(LightController& lightControllerLocal) {
-    winchUpButton = buttonAllocator.allocate(WINCH_UP_SW);
-    allButtons.push_back(winchUpButton);
+void initializeButtons(LightController& lightControllerLocal,
+                       WinchController& winchLocal) {
+    allButtons.push_back(buttonAllocator.allocate(WINCH_UP_SW));
+    allButtons.back()->registerObserver(&winchLocal);
 
-    winchDownButton = buttonAllocator.allocate(WINCH_DN_SW);
-    allButtons.push_back(winchDownButton);
+    allButtons.push_back(buttonAllocator.allocate(WINCH_DN_SW));
+    allButtons.back()->registerObserver(&winchLocal);
 
     // map buttons to lights
+    Light* light1 = lightControllerLocal.getLightByPin(LIGHT1_OUT);
     allButtons.push_back(buttonAllocator.allocate(L1_SW_A));
     allButtons.back()->registerObserver(light1);
     allButtons.push_back(buttonAllocator.allocate(L1_SW_B));
     allButtons.back()->registerObserver(light1);
 
+    Light* light2 = lightControllerLocal.getLightByPin(LIGHT2_OUT);
     allButtons.push_back(buttonAllocator.allocate(L2_SW_A));
     allButtons.back()->registerObserver(light2);
     allButtons.push_back(buttonAllocator.allocate(L2_SW_B));
     allButtons.back()->registerObserver(light2);
 
+    Light* light3 = lightControllerLocal.getLightByPin(LIGHT3_OUT);
     allButtons.push_back(buttonAllocator.allocate(L3_SW_A));
     allButtons.back()->registerObserver(light3);
     allButtons.push_back(buttonAllocator.allocate(L3_SW_B));
     allButtons.back()->registerObserver(light3);
 
+    Light* light4 = lightControllerLocal.getLightByPin(LIGHT4_OUT);
     allButtons.push_back(buttonAllocator.allocate(L4_SW_A));
     allButtons.back()->registerObserver(light4);
     allButtons.push_back(buttonAllocator.allocate(L4_SW_B));
     allButtons.back()->registerObserver(light4);
 
+    Light* ledStrip = lightControllerLocal.getLightByPin(LED_STRIP_OUT);
     allButtons.push_back(buttonAllocator.allocate(LED_STRIP_SW));
     allButtons.back()->registerObserver(ledStrip);
+
+    Light* podLight = lightControllerLocal.getLightByPin(POD_LIGHT_OUT);
     allButtons.push_back(buttonAllocator.allocate(POD_LIGHT_SW));
     allButtons.back()->registerObserver(podLight);
 
@@ -105,7 +96,7 @@ void initializeButtons(LightController& lightControllerLocal) {
 }
 
 void setup() {
-    cout << endl << FW_NAME << " " << GetVersionString() << endl;
+    cout << endl << FW_NAME << F(" ") << GetVersionString() << endl;
 
     // Initialize output-owning controllers first so outputs are immediately
     // configured and forced to their safe OFF states.
@@ -116,7 +107,7 @@ void setup() {
 
     safety.safeStartup();
 
-    initializeButtons(lightController);
+    initializeButtons(lightController, winch);
 
     cout << F("System Ready") << endl;
 }
@@ -127,22 +118,11 @@ void loop() {
         button->update();
     }
 
-    // Winch is hold-to-run.
-    // If both direction buttons are pressed, command STOP.
-    const bool winchUpPressed = winchUpButton->isPressed();
-    const bool winchDownPressed = winchDownButton->isPressed();
-
-    if (winchUpPressed && !winchDownPressed) {
-        winch.commandUp();
-    } else if (winchDownPressed && !winchUpPressed) {
-        winch.commandDown();
-    } else {
-        winch.stop();
-    }
-
     winch.update();
 
     safety.setWinchFault(winch.isFaulted());
     safety.setWinchCooldown(winch.isCoolingDown());
     safety.update();
+
+    frameRateMonitor.update();
 }

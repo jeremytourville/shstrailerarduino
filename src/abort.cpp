@@ -9,13 +9,11 @@ void Abort(const __FlashStringHelper* const message) {
 
     cout << endl << F("FATAL: ") << message << endl;
 
-    // Enter an infinite loop to halt execution
+    // Enter an infinite loop to halt execution. Solid status light is used to
+    // indicate a fatal error has occurred.
     while (true) {
         digitalWrite(LED_BUILTIN, HIGH);
-        delay(250);
-
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(250);
+        delay(1);
     }
 }
 
