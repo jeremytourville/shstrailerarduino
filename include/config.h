@@ -4,7 +4,7 @@
 
 #include "timer.h"
 
-#define FW_NAME "Trailer Controller"
+#define FW_NAME F("Trailer Controller")
 
 namespace shstrailer {
 

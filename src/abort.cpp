@@ -1,5 +1,7 @@
 #include "abort.h"
 
+#include "console.h"
+
 namespace shstrailer {
 
 void Abort(const __FlashStringHelper* const message) {
@@ -8,9 +10,7 @@ void Abort(const __FlashStringHelper* const message) {
     // Disable interrupts to prevent further execution
     noInterrupts();
 
-    // Optionally, you can add a message to indicate the reason for the abort
-    Serial.print(F("FATAL: "));
-    Serial.println(message);
+    cout << endl << F("FATAL: ") << message << endl;
 
     // Enter an infinite loop to halt execution
     while (true) {

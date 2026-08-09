@@ -3,6 +3,7 @@
 #include "array.h"
 #include "button.h"
 #include "config.h"
+#include "console.h"
 #include "light.h"
 #include "light_controller.h"
 #include "pins.h"
@@ -52,11 +53,7 @@ WinchController winch;
 SafetyController safety;
 
 void setup() {
-    if (ENABLE_SERIAL_DEBUG) {
-        Serial.begin(SERIAL_BAUD);
-        Serial.println();
-        Serial.println(FW_NAME);
-    }
+    cout << endl << FW_NAME << endl;
 
     // Initialize output-owning controllers first so outputs are immediately
     // configured and forced to their safe OFF states.
@@ -88,9 +85,7 @@ void setup() {
         button->registerObserver(&lightController);
     }
 
-    if (ENABLE_SERIAL_DEBUG) {
-        Serial.println(F("System Ready"));
-    }
+    cout << F("System Ready") << endl;
 }
 
 void loop() {
