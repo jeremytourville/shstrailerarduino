@@ -29,6 +29,7 @@ class ObjectAllocator {
     struct Slot {
         alignas(T) uint8_t storage[sizeof(T)];
     };
+
     Slot buffer_[N];
     size_t allocatedCount_ = 0;
 };

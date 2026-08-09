@@ -12,9 +12,6 @@ constexpr bool ENABLE_SERIAL_DEBUG = true;
 constexpr bool ENABLE_BATTERY_MONITOR = true;
 constexpr bool ENABLE_STATUS_LED = true;
 
-// Input filtering
-constexpr Timer::Stamp BUTTON_DEBOUNCE_MS = 30;
-
 // Winch protection
 constexpr Timer::Stamp WINCH_DIRECTION_DELAY_MS = 250;
 

@@ -10,11 +10,13 @@ class Light : public ButtonObserver {
    public:
     explicit Light(uint8_t pin);
 
-    void onPressed() override;
+    void onPressed(uint8_t pin) override;
 
     void on();
 
     void off();
+
+    [[nodiscard]] uint8_t getPin() const;
 
    private:
     void write(uint8_t newState);

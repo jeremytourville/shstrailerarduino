@@ -7,7 +7,9 @@ Light::Light(const uint8_t pin) : pin_(pin) {
     off();
 }
 
-void Light::onPressed() { write(HIGH == state_ ? LOW : HIGH); }
+void Light::onPressed([[maybe_unused]] const uint8_t pin) {
+    write(HIGH == state_ ? LOW : HIGH);
+}
 
 void Light::on() { write(HIGH); }
 
@@ -17,5 +19,7 @@ void Light::write(const uint8_t newState) {
     digitalWrite(pin_, newState);
     state_ = newState;
 }
+
+uint8_t Light::getPin() const { return pin_; }
 
 }  // namespace shstrailer

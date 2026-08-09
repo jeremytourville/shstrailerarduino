@@ -6,17 +6,19 @@ namespace shstrailer {
 
 Button::Button(const uint8_t pin) : pin_(pin) {
     pinMode(pin_, INPUT_PULLUP);
-    lastState_ = state_ = digitalRead(pin_);
+    lastDebounceState_ = state_ = digitalRead(pin_);
 }
 
 void Button::update() {
     const int currentState = digitalRead(pin_);
 
     // reset timer when the state changes
-    if (currentState != lastState_) {
+    if (currentState != lastDebounceState_) {
         debounceTimer_.start();
-        lastState_ = currentState;
+        lastDebounceState_ = currentState;
 
+        // no sense in checking timer or state change below since it just
+        // happened.
         return;
     }
 
@@ -26,11 +28,15 @@ void Button::update() {
         state_ = currentState;
 
         // the long press event was broken, it is now a pressed event
-        if (HIGH == state_ && longPressPending_) {
-            notifyPressed();
+        if (HIGH == state_) {
+            if (longPressPending_) {
+                notifyPressed();
+            }
+
+            notifyReleased();
         }
 
-        longPressPending_ = isPressed();
+        longPressPending_ = LOW == state_;
 
         if (longPressPending_) {
             longPressTimer_.start();
@@ -42,6 +48,10 @@ void Button::update() {
         longPressPending_ = false;
 
         notifyLongPressed();
+    }
+
+    if (LOW == state_) {
+        notifyContinuousPress();
     }
 }
 
@@ -55,13 +65,25 @@ void Button::registerObserver(ButtonObserver* observer) {
 
 void Button::notifyPressed() {
     for (auto observer : observers_) {
-        observer->onPressed();
+        observer->onPressed(pin_);
     }
 }
 
 void Button::notifyLongPressed() {
     for (auto observer : observers_) {
-        observer->onLongPressed();
+        observer->onLongPressed(pin_);
+    }
+}
+
+void Button::notifyContinuousPress() {
+    for (auto observer : observers_) {
+        observer->onContinuousPress(pin_);
+    }
+}
+
+void Button::notifyReleased() {
+    for (auto observer : observers_) {
+        observer->onReleased(pin_);
     }
 }
 

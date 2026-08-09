@@ -26,7 +26,9 @@ void WinchController::begin() {
 }
 
 void WinchController::commandUp() { m_requested = WinchDirection::UP; }
+
 void WinchController::commandDown() { m_requested = WinchDirection::DOWN; }
+
 void WinchController::stop() { m_requested = WinchDirection::STOP; }
 
 void WinchController::setOutputs(bool up, bool down) {
@@ -34,6 +36,7 @@ void WinchController::setOutputs(bool up, bool down) {
         up = false;
         down = false;
     }
+
     digitalWrite(WINCH_UP_OUT, up ? OUTPUT_ON : OUTPUT_OFF);
     digitalWrite(WINCH_DN_OUT, down ? OUTPUT_ON : OUTPUT_OFF);
 }
@@ -43,7 +46,9 @@ void WinchController::beginRun(WinchDirection direction, uint32_t now) {
         setOutputs(false, false);
         return;
     }
+
     m_runStartTime = now;
+
     if (direction == WinchDirection::UP) {
         setOutputs(true, false);
         m_state = WinchState::RUNNING_UP;
@@ -55,12 +60,15 @@ void WinchController::beginRun(WinchDirection direction, uint32_t now) {
 
 void WinchController::endRunAndStartCooldown(uint32_t now) {
     setOutputs(false, false);
+
     const uint32_t runTimeMs = now - m_runStartTime;
+
     if (runTimeMs > (UINT32_MAX / WINCH_OFF_TO_ON_RATIO)) {
         m_requiredCooldownMs = UINT32_MAX;
     } else {
         m_requiredCooldownMs = runTimeMs * WINCH_OFF_TO_ON_RATIO;
     }
+
     m_cooldownStartTime = now;
     m_coolingDown = (m_requiredCooldownMs > 0);
 }
@@ -71,7 +79,10 @@ void WinchController::enterFault(uint32_t now) {
 }
 
 void WinchController::updateCooldown(uint32_t now) {
-    if (!m_coolingDown) return;
+    if (!m_coolingDown) {
+        return;
+    }
+
     if ((uint32_t)(now - m_cooldownStartTime) >= m_requiredCooldownMs) {
         m_coolingDown = false;
         m_requiredCooldownMs = 0;
@@ -141,14 +152,43 @@ void WinchController::update() {
 }
 
 bool WinchController::isFaulted() const { return m_state == WinchState::FAULT; }
+
 bool WinchController::isCoolingDown() const { return m_coolingDown; }
+
 WinchState WinchController::state() const { return m_state; }
 
 uint32_t WinchController::cooldownRemainingMs() const {
-    if (!m_coolingDown) return 0;
+    if (!m_coolingDown) {
+        return 0;
+    }
+
     const uint32_t elapsed = millis() - m_cooldownStartTime;
-    if (elapsed >= m_requiredCooldownMs) return 0;
+
+    if (elapsed >= m_requiredCooldownMs) {
+        return 0;
+    }
+
     return m_requiredCooldownMs - elapsed;
+}
+
+void WinchController::onContinuousPress(const uint8_t pin) {
+    // Winch is hold-to-run. Both buttons cannot be pressed because it uses a
+    // momentary rocker.
+    switch (pin) {
+        case WINCH_UP_SW:
+            commandUp();
+            break;
+        case WINCH_DN_SW:
+            commandDown();
+            break;
+    }
+}
+
+void WinchController::onReleased([[maybe_unused]] const uint8_t pin) {
+    // Winch is subscribed only to WINCH_UP_SW and WINCH_DN_SW, no other
+    // button will cause this to be called.
+
+    stop();
 }
 
 }  // namespace shstrailer

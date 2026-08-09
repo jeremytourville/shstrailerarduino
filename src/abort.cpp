@@ -1,21 +1,20 @@
 #include "abort.h"
 
 #include "console.h"
+#include "pins.h"
 
 namespace shstrailer {
 
 void Abort(const __FlashStringHelper* const message) {
-    pinMode(LED_BUILTIN, OUTPUT);
+    pinMode(STATUS_LED, OUTPUT);
 
     cout << endl << F("FATAL: ") << message << endl;
 
-    // Enter an infinite loop to halt execution
+    // Enter an infinite loop to halt execution. Solid status light is used to
+    // indicate a fatal error has occurred.
     while (true) {
-        digitalWrite(LED_BUILTIN, HIGH);
-        delay(250);
-
-        digitalWrite(LED_BUILTIN, LOW);
-        delay(250);
+        digitalWrite(STATUS_LED, HIGH);
+        delay(1);
     }
 }
 

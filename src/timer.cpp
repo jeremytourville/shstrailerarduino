@@ -12,18 +12,18 @@ Timer::Timer() {
     start();
 }
 
-void Timer::start() { m_startTime = millis(); }
+void Timer::start() { startTime_ = millis(); }
 
 Timer::Stamp Timer::elapsed() const {
     const Stamp now = millis();
 
     // normally time will be monotonic
-    if (now >= m_startTime) {
-        return now - m_startTime;
+    if (now >= startTime_) {
+        return now - startTime_;
     }
 
     // if we get here, millis() has wrapped around since start() was called
-    return (ULONG_MAX - m_startTime + 1) + now;
+    return (ULONG_MAX - startTime_ + 1) + now;
 }
 
 }  // namespace shstrailer

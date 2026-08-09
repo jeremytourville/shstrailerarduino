@@ -1,5 +1,7 @@
 #include "safety.h"
 
+#include "console.h"
+
 namespace shstrailer {
 
 SafetyController::SafetyController() : m_ledState(false) {
