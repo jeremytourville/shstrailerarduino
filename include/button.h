@@ -17,12 +17,14 @@ class Button {
 
     void registerObserver(ButtonObserver* observer);
 
-    [[nodiscard]] bool isPressed() const { return LOW == state_; }
-
    private:
     void notifyPressed();
 
     void notifyLongPressed();
+
+    void notifyContinuousPress();
+
+    void notifyReleased();
 
     static constexpr Timer::Stamp kDebounceDuration = 30;
     static constexpr Timer::Stamp kLongPressDuration = 2000;
@@ -31,7 +33,7 @@ class Button {
     Timer debounceTimer_;
     Timer longPressTimer_;
     int state_ = LOW;
-    int lastState_ = LOW;
+    int lastDebounceState_ = LOW;
     const uint8_t pin_;
     bool longPressPending_ = false;
 };

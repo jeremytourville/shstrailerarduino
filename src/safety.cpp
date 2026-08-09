@@ -105,7 +105,6 @@ void SafetyController::updateStatusLED() {
                 m_ledTimer.start();
                 m_ledState = !m_ledState;
                 digitalWrite(STATUS_LED, m_ledState ? HIGH : LOW);
-                cout << F("low battery") << endl;
             }
             break;
 
@@ -115,7 +114,6 @@ void SafetyController::updateStatusLED() {
                 m_ledTimer.start();
                 m_ledState = !m_ledState;
                 digitalWrite(STATUS_LED, m_ledState ? HIGH : LOW);
-                cout << F("winch fault") << endl;
             }
             break;
     }

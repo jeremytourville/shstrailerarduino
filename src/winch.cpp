@@ -171,7 +171,7 @@ uint32_t WinchController::cooldownRemainingMs() const {
     return m_requiredCooldownMs - elapsed;
 }
 
-void WinchController::onPressed(const uint8_t pin) {
+void WinchController::onContinuousPress(const uint8_t pin) {
     // Winch is hold-to-run. Both buttons cannot be pressed because it uses a
     // momentary rocker.
     switch (pin) {
@@ -182,6 +182,13 @@ void WinchController::onPressed(const uint8_t pin) {
             commandDown();
             break;
     }
+}
+
+void WinchController::onReleased([[maybe_unused]] const uint8_t pin) {
+    // Winch is subscribed only to WINCH_UP_SW and WINCH_DN_SW, no other
+    // button will cause this to be called.
+
+    stop();
 }
 
 }  // namespace shstrailer
