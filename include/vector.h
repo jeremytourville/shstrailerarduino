@@ -180,6 +180,7 @@ class Vector {
     void pop_back() {
         back().~T();
         --size_;
+        allocator_.pop_back();
     }
 
     [[nodiscard]] const_reference front() const { return *data_[0]; }

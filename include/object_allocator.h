@@ -34,6 +34,8 @@ class ObjectAllocator {
 
     void clear() { allocatedCount_ = 0; }
 
+    void pop_back() { --allocatedCount_; }
+
    private:
     void AbortIfOverflow() {
         if (allocatedCount_ >= N) {
