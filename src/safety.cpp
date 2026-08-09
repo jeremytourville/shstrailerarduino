@@ -19,13 +19,7 @@ void SafetyController::begin() {
 }
 
 void SafetyController::safeStartup() {
-    // Explicitly force every controlled output OFF before entering READY.
-    digitalWrite(LIGHT1_OUT, OUTPUT_OFF);
-    digitalWrite(LIGHT2_OUT, OUTPUT_OFF);
-    digitalWrite(LIGHT3_OUT, OUTPUT_OFF);
-    digitalWrite(LIGHT4_OUT, OUTPUT_OFF);
-    digitalWrite(LED_STRIP_OUT, OUTPUT_OFF);
-    digitalWrite(POD_LIGHT_OUT, OUTPUT_OFF);
+    // Explicitly force winch controlled output OFF before entering READY.
     digitalWrite(WINCH_UP_OUT, OUTPUT_OFF);
     digitalWrite(WINCH_DN_OUT, OUTPUT_OFF);
 
