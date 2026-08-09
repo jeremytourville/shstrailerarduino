@@ -7,9 +7,6 @@ namespace shstrailer {
 void Abort(const __FlashStringHelper* const message) {
     pinMode(LED_BUILTIN, OUTPUT);
 
-    // Disable interrupts to prevent further execution
-    noInterrupts();
-
     cout << endl << F("FATAL: ") << message << endl;
 
     // Enter an infinite loop to halt execution

@@ -1,5 +1,7 @@
 #include "version.h"
 
+#include <stdio.h>
+
 namespace shstrailer {
 
 const char* GetVersionString() {

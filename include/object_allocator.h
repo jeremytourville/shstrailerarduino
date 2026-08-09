@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 
+#include <new>
+
+#include "abort.h"
 #include "forward.h"
 
 namespace shstrailer {

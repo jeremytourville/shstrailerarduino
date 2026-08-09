@@ -4,16 +4,20 @@ namespace shstrailer {
 
 namespace {
 
+void Initialize(bool& initialized) {
+    if (!initialized) {
+        initialized = true;
+        Serial.begin(SERIAL_BAUD);
+    }
+}
+
 template <typename T>
 void PrintToSerial(bool& initialized, const T& value) {
     if (!ENABLE_SERIAL_DEBUG) {
         return;
     }
 
-    if (!initialized) {
-        initialized = true;
-        Serial.begin(SERIAL_BAUD);
-    }
+    Initialize(initialized);
 
     Serial.print(value);
 }
@@ -82,6 +86,7 @@ Console& operator<<(Console& console, const __FlashStringHelper* const value) {
 
 Console& operator<<(Console& console, const EndLine&) {
     if (ENABLE_SERIAL_DEBUG) {
+        Initialize(console.initialized_);
         Serial.println();
     }
 
