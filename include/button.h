@@ -29,7 +29,7 @@ class Button {
     static constexpr Timer::Stamp kDebounceDuration = 30;
     static constexpr Timer::Stamp kLongPressDuration = 2000;
 
-    Vector<ButtonObserver*> observers_;
+    Vector<ButtonObserver*, 4> observers_;
     Timer debounceTimer_;
     Timer longPressTimer_;
     int state_ = LOW;
