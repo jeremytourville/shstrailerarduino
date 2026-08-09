@@ -30,10 +30,11 @@ class Button {
     Vector<ButtonObserver*> observers_;
     Timer debounceTimer_;
     Timer longPressTimer_;
-    int state_;
-    int lastState_;
+    int state_ = LOW;
+    int lastState_ = LOW;
     const uint8_t pin_;
     bool longPressPending_ = false;
+    bool initialized_ = false;
 };
 
 }  // namespace shstrailer

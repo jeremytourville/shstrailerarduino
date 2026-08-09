@@ -12,8 +12,6 @@ inline EndLine endl;
 
 class Console {
    public:
-    Console();
-
     friend Console& operator<<(Console& console, const int8_t value);
 
     friend Console& operator<<(Console& console, const uint8_t value);
@@ -36,6 +34,9 @@ class Console {
                                const __FlashStringHelper* const value);
 
     friend Console& operator<<(Console& console, const EndLine&);
+
+   private:
+    bool initialized_ = false;
 };
 
 inline Console cout;

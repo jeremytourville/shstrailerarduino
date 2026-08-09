@@ -32,9 +32,10 @@ Button podLightButton(POD_LIGHT_SW);
 Button winchUpButton(WINCH_UP_SW);
 Button winchDownButton(WINCH_DN_SW);
 
-Array<Button*, 10> allButtons = {
-    &button1A, &button1B, &button2A, &button2B,       &button3A,
-    &button3B, &button4A, &button4B, &ledStripButton, &podLightButton};
+Array<Button*, 12> allButtons = {
+    &button1A,       &button1B,       &button2A,      &button2B,
+    &button3A,       &button3B,       &button4A,      &button4B,
+    &ledStripButton, &podLightButton, &winchUpButton, &winchDownButton};
 
 //
 // Lights

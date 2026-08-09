@@ -17,10 +17,18 @@ class Light : public ButtonObserver {
     void off();
 
    private:
+    void offInternal();
+
+    void initialize();
+
     void write();
 
+    static constexpr uint8_t kUninitialized = 3;
+
     const uint8_t pin_;
-    uint8_t state_;
+    // set to a state that is neither HIGH nor LOW so that the first call to
+    // write() calls pinMode()
+    uint8_t state_ = kUninitialized;
 };
 
 }  // namespace shstrailer

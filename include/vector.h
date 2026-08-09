@@ -7,7 +7,7 @@
 namespace shstrailer {
 
 //
-// The N template paramter is the maximum number of elements that can be stored
+// The N template parameter is the maximum number of elements that can be stored
 // in the vector, and also can contribute to RAM size on arduino.
 //
 template <typename T, const uint16_t N = 16>

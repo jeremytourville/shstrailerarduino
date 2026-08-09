@@ -3,10 +3,10 @@
 namespace shstrailer {
 
 const char* GetVersionString() {
-    static char version_string[16];
+    static char version_string[19];
 
-    snprintf(version_string, sizeof(version_string), "v%u.%u.%u", kMajorVersion,
-             kMinorVersion, kPatchVersion);
+    snprintf(version_string, sizeof(version_string), "v%hu.%hu.%hu",
+             kMajorVersion, kMinorVersion, kPatchVersion);
 
     return version_string;
 }
