@@ -1,5 +1,7 @@
 #include "winch.h"
 
+namespace shstrailer {
+
 WinchController::WinchController()
     : m_state(WinchState::IDLE),
       m_requested(WinchDirection::STOP),
@@ -28,7 +30,10 @@ void WinchController::commandDown() { m_requested = WinchDirection::DOWN; }
 void WinchController::stop() { m_requested = WinchDirection::STOP; }
 
 void WinchController::setOutputs(bool up, bool down) {
-    if (up && down) { up = false; down = false; }
+    if (up && down) {
+        up = false;
+        down = false;
+    }
     digitalWrite(WINCH_UP_OUT, up ? OUTPUT_ON : OUTPUT_OFF);
     digitalWrite(WINCH_DN_OUT, down ? OUTPUT_ON : OUTPUT_OFF);
 }
@@ -81,8 +86,10 @@ void WinchController::update() {
         case WinchState::IDLE:
             setOutputs(false, false);
             if (!m_coolingDown) {
-                if (m_requested == WinchDirection::UP) beginRun(WinchDirection::UP, now);
-                else if (m_requested == WinchDirection::DOWN) beginRun(WinchDirection::DOWN, now);
+                if (m_requested == WinchDirection::UP)
+                    beginRun(WinchDirection::UP, now);
+                else if (m_requested == WinchDirection::DOWN)
+                    beginRun(WinchDirection::DOWN, now);
             }
             break;
 
@@ -94,7 +101,8 @@ void WinchController::update() {
                 endRunAndStartCooldown(now);
                 m_state = WinchState::DIRECTION_DELAY;
                 m_stateTimer = now;
-            } else if ((uint32_t)(now - m_runStartTime) >= WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
+            } else if ((uint32_t)(now - m_runStartTime) >=
+                       WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
                 enterFault(now);
             }
             break;
@@ -107,7 +115,8 @@ void WinchController::update() {
                 endRunAndStartCooldown(now);
                 m_state = WinchState::DIRECTION_DELAY;
                 m_stateTimer = now;
-            } else if ((uint32_t)(now - m_runStartTime) >= WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
+            } else if ((uint32_t)(now - m_runStartTime) >=
+                       WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
                 enterFault(now);
             }
             break;
@@ -116,7 +125,8 @@ void WinchController::update() {
             setOutputs(false, false);
             if (m_requested == WinchDirection::STOP) {
                 m_state = WinchState::IDLE;
-            } else if ((uint32_t)(now - m_stateTimer) >= WINCH_DIRECTION_DELAY_MS) {
+            } else if ((uint32_t)(now - m_stateTimer) >=
+                       WINCH_DIRECTION_DELAY_MS) {
                 m_state = WinchState::IDLE;
             }
             break;
@@ -140,3 +150,5 @@ uint32_t WinchController::cooldownRemainingMs() const {
     if (elapsed >= m_requiredCooldownMs) return 0;
     return m_requiredCooldownMs - elapsed;
 }
+
+}  // namespace shstrailer

@@ -1,13 +1,15 @@
-#ifndef SAFETY_H
-#define SAFETY_H
+#pragma once
 
 #include <Arduino.h>
+
 #include "config.h"
 #include "pins.h"
 #include "types.h"
 
+namespace shstrailer {
+
 class SafetyController {
-public:
+   public:
     SafetyController();
 
     void begin();
@@ -19,7 +21,7 @@ public:
 
     const ControllerStatus& status() const;
 
-private:
+   private:
     ControllerStatus m_status;
 
     uint32_t m_ledTimer;
@@ -32,4 +34,4 @@ private:
     void updateStatusLED();
 };
 
-#endif
+}  // namespace shstrailer

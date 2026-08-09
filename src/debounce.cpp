@@ -1,11 +1,12 @@
 #include "debounce.h"
 
+namespace shstrailer {
+
 DebouncedButton::DebouncedButton(uint8_t pin)
     : m_pin(pin),
       m_currentState(SWITCH_RELEASED),
       m_previousState(SWITCH_RELEASED),
-      m_pressEvent(false),
-      m_lastDebounceTime(0) {}
+      m_pressEvent(false) {}
 
 void DebouncedButton::begin() {
     pinMode(m_pin, INPUT_PULLUP);
@@ -14,19 +15,18 @@ void DebouncedButton::begin() {
     m_currentState = initialState;
     m_previousState = initialState;
     m_pressEvent = false;
-    m_lastDebounceTime = millis();
+    m_timer.start();
 }
 
 void DebouncedButton::update() {
     const bool raw = digitalRead(m_pin);
-    const uint32_t now = millis();
 
     if (raw != m_previousState) {
         m_previousState = raw;
-        m_lastDebounceTime = now;
+        m_timer.start();
     }
 
-    if ((uint32_t)(now - m_lastDebounceTime) >= BUTTON_DEBOUNCE_MS) {
+    if (m_timer.elapsed() >= BUTTON_DEBOUNCE_MS) {
         if (raw != m_currentState) {
             m_currentState = raw;
 
@@ -46,3 +46,5 @@ bool DebouncedButton::wasPressed() {
 bool DebouncedButton::isPressed() const {
     return m_currentState == SWITCH_PRESSED;
 }
+
+}  // namespace shstrailer

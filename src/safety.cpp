@@ -1,10 +1,9 @@
 #include "safety.h"
 
-SafetyController::SafetyController()
-    : m_ledTimer(0),
-      m_batteryTimer(0),
-      m_ledState(false) {
+namespace shstrailer {
 
+SafetyController::SafetyController()
+    : m_ledTimer(0), m_batteryTimer(0), m_ledState(false) {
     m_status.systemState = SystemState::STARTUP;
     m_status.battery = {0.0f, false, false};
     m_status.winchFault = false;
@@ -49,15 +48,13 @@ void SafetyController::readBattery() {
         adcTotal += analogRead(BATTERY_VOLTAGE_PIN);
     }
 
-    const float adcAverage =
-        (float)adcTotal / (float)BATTERY_AVERAGE_SAMPLES;
+    const float adcAverage = (float)adcTotal / (float)BATTERY_AVERAGE_SAMPLES;
 
     const float vPin =
         (adcAverage * ADC_REFERENCE_VOLTAGE) / (float)ADC_MAX_COUNTS;
 
     const float dividerRatio =
-        (VOLTAGE_DIVIDER_R1 + VOLTAGE_DIVIDER_R2) /
-        VOLTAGE_DIVIDER_R2;
+        (VOLTAGE_DIVIDER_R1 + VOLTAGE_DIVIDER_R2) / VOLTAGE_DIVIDER_R2;
 
     const float vBatt = vPin * dividerRatio;
 
@@ -77,11 +74,9 @@ void SafetyController::setWinchCooldown(bool coolingDown) {
 void SafetyController::updateSystemState() {
     if (m_status.winchFault || m_status.winchCooldown) {
         m_status.systemState = SystemState::FAULT;
-    }
-    else if (ENABLE_BATTERY_MONITOR && m_status.battery.critical) {
+    } else if (ENABLE_BATTERY_MONITOR && m_status.battery.critical) {
         m_status.systemState = SystemState::LOW_BATTERY;
-    }
-    else {
+    } else {
         m_status.systemState = SystemState::READY;
     }
 }
@@ -102,7 +97,8 @@ void SafetyController::updateStatusLED() {
             break;
 
         case SystemState::READY:
-            // Slow heartbeat: short visual activity without looking like an alarm.
+            // Slow heartbeat: short visual activity without looking like an
+            // alarm.
             if ((uint32_t)(now - m_ledTimer) >= 1000UL) {
                 m_ledTimer = now;
                 m_ledState = !m_ledState;
@@ -135,7 +131,6 @@ void SafetyController::update() {
 
     if (ENABLE_BATTERY_MONITOR &&
         (uint32_t)(now - m_batteryTimer) >= BATTERY_SAMPLE_INTERVAL_MS) {
-
         m_batteryTimer = now;
         readBattery();
     }
@@ -144,6 +139,6 @@ void SafetyController::update() {
     updateStatusLED();
 }
 
-const ControllerStatus& SafetyController::status() const {
-    return m_status;
-}
+const ControllerStatus& SafetyController::status() const { return m_status; }
+
+}  // namespace shstrailer

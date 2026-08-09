@@ -1,7 +1,8 @@
-#ifndef PINS_H
-#define PINS_H
+#pragma once
 
 #include <Arduino.h>
+
+namespace shstrailer {
 
 constexpr uint8_t STATUS_LED = 13;
 
@@ -31,4 +32,4 @@ constexpr uint8_t WINCH_DN_OUT = 41;
 
 constexpr uint8_t BATTERY_VOLTAGE_PIN = A0;
 
-#endif
+}  // namespace shstrailer

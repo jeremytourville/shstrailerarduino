@@ -1,12 +1,14 @@
 #include <Arduino.h>
 
 #include "config.h"
-#include "pins.h"
-#include "types.h"
 #include "debounce.h"
 #include "lighting.h"
-#include "winch.h"
+#include "pins.h"
 #include "safety.h"
+#include "types.h"
+#include "winch.h"
+
+using namespace shstrailer;
 
 DebouncedButton light1A(L1_SW_A);
 DebouncedButton light1B(L1_SW_B);
@@ -112,11 +114,9 @@ void loop() {
 
     if (winchUpPressed && !winchDownPressed) {
         winch.commandUp();
-    }
-    else if (winchDownPressed && !winchUpPressed) {
+    } else if (winchDownPressed && !winchUpPressed) {
         winch.commandDown();
-    }
-    else {
+    } else {
         winch.stop();
     }
 

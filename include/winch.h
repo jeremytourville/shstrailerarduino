@@ -1,13 +1,15 @@
-#ifndef WINCH_H
-#define WINCH_H
+#pragma once
 
 #include <Arduino.h>
+
 #include "config.h"
 #include "pins.h"
 #include "types.h"
 
+namespace shstrailer {
+
 class WinchController {
-public:
+   public:
     WinchController();
     void begin();
     void update();
@@ -19,7 +21,7 @@ public:
     WinchState state() const;
     uint32_t cooldownRemainingMs() const;
 
-private:
+   private:
     WinchState m_state;
     WinchDirection m_requested;
     uint32_t m_stateTimer;
@@ -35,4 +37,4 @@ private:
     void updateCooldown(uint32_t now);
 };
 
-#endif
+}  // namespace shstrailer

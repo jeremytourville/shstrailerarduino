@@ -1,9 +1,10 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
 
 #include <Arduino.h>
 
 #define FW_NAME "Trailer Controller"
+
+namespace shstrailer {
 
 constexpr bool ENABLE_SERIAL_DEBUG = true;
 constexpr bool ENABLE_BATTERY_MONITOR = true;
@@ -50,4 +51,4 @@ constexpr bool SWITCH_RELEASED = HIGH;
 constexpr bool OUTPUT_ON = HIGH;
 constexpr bool OUTPUT_OFF = LOW;
 
-#endif
+}  // namespace shstrailer
