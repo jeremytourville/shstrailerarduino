@@ -7,7 +7,7 @@ namespace shstrailer {
 
 Timer::Timer() {
     static_assert(sizeof(Stamp) == 4,
-                  "SafeTimer only works with 32-bit unsigned long");
+                  "Timer only works with 32-bit unsigned long");
 
     start();
 }

@@ -19,7 +19,7 @@ void SafetyController::begin() {
 }
 
 void SafetyController::safeStartup() {
-    // Explicitly force every controlled output OFF before entering READY.
+    // Explicitly force winch controlled output OFF before entering READY.
     digitalWrite(WINCH_UP_OUT, OUTPUT_OFF);
     digitalWrite(WINCH_DN_OUT, OUTPUT_OFF);
 

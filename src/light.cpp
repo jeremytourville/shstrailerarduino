@@ -2,7 +2,10 @@
 
 namespace shstrailer {
 
-Light::Light(const uint8_t pin) : pin_(pin) { pinMode(pin_, OUTPUT); }
+Light::Light(const uint8_t pin) : pin_(pin) {
+    pinMode(pin_, OUTPUT);
+    off();
+}
 
 void Light::onPressed() { write(HIGH == state_ ? LOW : HIGH); }
 

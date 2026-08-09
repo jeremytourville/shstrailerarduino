@@ -63,8 +63,6 @@ void initializeLights(LightController& lightControllerLocal) {
 
     podLight = lightAllocator.allocate(POD_LIGHT_OUT);
     lightControllerLocal.registerLight(podLight);
-
-    lightControllerLocal.off();
 }
 
 void initializeButtons(LightController& lightControllerLocal) {
