@@ -17,11 +17,7 @@ class Light : public ButtonObserver {
     void off();
 
    private:
-    void offInternal();
-
-    void initialize();
-
-    void write();
+    void write(uint8_t newState);
 
     static constexpr uint8_t kUninitialized = 3;
 
