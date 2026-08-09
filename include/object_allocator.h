@@ -13,7 +13,7 @@ template <typename T, const uint8_t N>
 class ObjectAllocator {
    public:
     template <typename... Args>
-    T* allocate(Args&&... args) {
+    [[nodiscard]] T* allocate(Args&&... args) {
         if (allocatedCount_ >= N) {
             Abort(F("ObjectAllocator overflow"));
         }

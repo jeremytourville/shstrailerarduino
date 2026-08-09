@@ -24,7 +24,7 @@ void PrintToSerial(bool& initialized, const T& value) {
 
 }  // namespace
 
-Console& operator<<(Console& console, const int8_t value) {
+Console& operator<<(Console& console, const char value) {
     PrintToSerial(console.initialized_, value);
 
     return console;

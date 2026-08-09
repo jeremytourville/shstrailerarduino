@@ -12,7 +12,7 @@ inline EndLine endl;
 
 class Console {
    public:
-    friend Console& operator<<(Console& console, const int8_t value);
+    friend Console& operator<<(Console& console, const char value);
 
     friend Console& operator<<(Console& console, const uint8_t value);
 
