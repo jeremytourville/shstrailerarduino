@@ -18,14 +18,18 @@ class ObjectAllocator {
             Abort(F("ObjectAllocator overflow"));
         }
 
-        T* obj = new (buffer_ + allocatedCount_ * sizeof(T))
-            T(forward<Args>(args)...);
+        T* obj =
+            new (buffer_[allocatedCount_].storage) T(forward<Args>(args)...);
         ++allocatedCount_;
+
         return obj;
     }
 
    private:
-    alignas(T) uint8_t buffer_[sizeof(T) * N];
+    struct Slot {
+        alignas(T) uint8_t storage[sizeof(T)];
+    };
+    Slot buffer_[N];
     size_t allocatedCount_ = 0;
 };
 
