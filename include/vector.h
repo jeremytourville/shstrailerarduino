@@ -60,6 +60,12 @@ class Vector {
         data_[size_++] = static_cast<T&&>(value);
     }
 
+    [[nodiscard]] T& back() {
+        return const_cast<T&>(static_cast<const Vector*>(this)->back());
+    }
+
+    [[nodiscard]] const T& back() const { return at(size_ - 1); }
+
    private:
     void AbortIfOverflow() {
         if (N == size_) {

@@ -34,7 +34,6 @@ class Button {
     int lastState_ = LOW;
     const uint8_t pin_;
     bool longPressPending_ = false;
-    bool initialized_ = false;
 };
 
 }  // namespace shstrailer

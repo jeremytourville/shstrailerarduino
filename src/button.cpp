@@ -4,15 +4,12 @@
 
 namespace shstrailer {
 
-Button::Button(const uint8_t pin) : pin_(pin) {}
+Button::Button(const uint8_t pin) : pin_(pin) {
+    pinMode(pin_, INPUT_PULLUP);
+    lastState_ = state_ = digitalRead(pin_);
+}
 
 void Button::update() {
-    if (!initialized_) {
-        initialized_ = true;
-        pinMode(pin_, INPUT_PULLUP);
-        lastState_ = state_ = digitalRead(pin_);
-    }
-
     const int currentState = digitalRead(pin_);
 
     // reset timer when the state changes
