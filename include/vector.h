@@ -239,7 +239,7 @@ class Vector<T*, N> {
             return !(*this == other);
         }
 
-        [[nodiscard]] I* operator*() const { return *ptr_; }
+        [[nodiscard]] I*& operator*() const { return *ptr_; }
 
        private:
         I** ptr_;
@@ -269,17 +269,17 @@ class Vector<T*, N> {
             return !(*this == other);
         }
 
-        [[nodiscard]] const I* operator*() const { return *ptr_; }
+        [[nodiscard]] I* const& operator*() const { return *ptr_; }
 
        private:
         I* const* ptr_;
     };
 
     Vector() = default;
-    Vector(const Vector&) = delete;
-    Vector(Vector&&) = delete;
-    Vector& operator=(const Vector&) = delete;
-    Vector& operator=(Vector&&) = delete;
+    Vector(const Vector&) = default;
+    Vector(Vector&&) = default;
+    Vector& operator=(const Vector&) = default;
+    Vector& operator=(Vector&&) = default;
 
     ~Vector() { clear(); }
 
@@ -352,9 +352,11 @@ class Vector<T*, N> {
 
     [[nodiscard]] const_reference front() const { return data_[0]; }
 
-    [[nodiscard]] reference front() { return data_[0]; }
+    [[nodiscard]] reference front() {
+        return const_cast<T*&>(static_cast<const Vector*>(this)->front());
+    }
 
-    [[nodiscard]] const T* data() const { return data_[0]; }
+    [[nodiscard]] const T* data() const { return data_; }
 
     [[nodiscard]] T* data() {
         return const_cast<T*>(static_cast<const Vector*>(this)->data());
