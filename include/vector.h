@@ -7,6 +7,7 @@
 #include "object_allocator.h"
 
 namespace shstrailer {
+
 //
 // This is a limited functionality vector implementation that is designed to be
 // used in an embedded environment. It has a fixed size capacity but has a
@@ -203,6 +204,171 @@ class Vector {
     }
 
     ObjectAllocator<T, N> allocator_;
+    T* data_[N];
+    uint16_t size_ = 0;
+};
+
+template <typename T, const uint16_t N>
+class Vector<T*, N> {
+   public:
+    using value_type = T*;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+
+    template <typename I>
+    class iterator {
+       public:
+        iterator(I** ptr) : ptr_(ptr) {}
+
+        iterator& operator++() {
+            ++ptr_;
+            return *this;
+        }
+
+        [[nodiscard]] iterator operator++(int) {
+            auto tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        [[nodiscard]] bool operator==(const iterator& other) const {
+            return ptr_ == other.ptr_;
+        }
+
+        [[nodiscard]] bool operator!=(const iterator& other) const {
+            return !(*this == other);
+        }
+
+        [[nodiscard]] I*& operator*() const { return *ptr_; }
+
+       private:
+        I** ptr_;
+    };
+
+    template <typename I>
+    class const_iterator {
+       public:
+        const_iterator(I* const* ptr) : ptr_(ptr) {}
+
+        const_iterator& operator++() {
+            ++ptr_;
+            return *this;
+        }
+
+        [[nodiscard]] const_iterator operator++(int) {
+            auto tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        [[nodiscard]] bool operator==(const const_iterator& other) const {
+            return ptr_ == other.ptr_;
+        }
+
+        [[nodiscard]] bool operator!=(const const_iterator& other) const {
+            return !(*this == other);
+        }
+
+        [[nodiscard]] I* const& operator*() const { return *ptr_; }
+
+       private:
+        I* const* ptr_;
+    };
+
+    Vector() = default;
+    Vector(const Vector&) = default;
+    Vector(Vector&&) = default;
+    Vector& operator=(const Vector&) = default;
+    Vector& operator=(Vector&&) = default;
+
+    ~Vector() { clear(); }
+
+    void emplace_back(T* value) {
+        AbortIfOverflow();
+
+        data_[size_] = value;
+        ++size_;
+    }
+
+    void push_back(T* value) {
+        AbortIfOverflow();
+
+        data_[size_] = value;
+        ++size_;
+    }
+
+    [[nodiscard]] const_reference at(const uint16_t index) const {
+        if (index >= size_) {
+            Abort(F("Vector index out of bounds"));
+        }
+
+        return data_[index];
+    }
+
+    [[nodiscard]] reference at(const uint16_t index) {
+        return const_cast<T*&>(static_cast<const Vector*>(this)->at(index));
+    }
+
+    const_reference operator[](const uint16_t index) const {
+        return data_[index];
+    }
+
+    reference operator[](const uint16_t index) {
+        return const_cast<T*&>(
+            static_cast<const Vector*>(this)->operator[](index));
+    }
+
+    [[nodiscard]] uint16_t size() const { return size_; }
+
+    [[nodiscard]] uint16_t max_size() const { return N; }
+
+    [[nodiscard]] uint16_t capacity() const { return N; }
+
+    [[nodiscard]] bool empty() const { return 0 == size_; }
+
+    [[nodiscard]] const_iterator<const T> begin() const {
+        return const_iterator<const T>(data_);
+    }
+
+    [[nodiscard]] const_iterator<const T> end() const {
+        return const_iterator<const T>(data_ + size_);
+    }
+
+    [[nodiscard]] iterator<T> begin() { return iterator<T>(data_); }
+
+    [[nodiscard]] iterator<T> end() { return iterator<T>(data_ + size_); }
+
+    [[nodiscard]] const_iterator<const T> cbegin() const { return begin(); }
+
+    [[nodiscard]] const_iterator<const T> cend() const { return end(); }
+
+    void clear() { size_ = 0; }
+
+    [[nodiscard]] const_reference back() const { return data_[size_ - 1]; }
+
+    [[nodiscard]] reference back() { return data_[size_ - 1]; }
+
+    void pop_back() { --size_; }
+
+    [[nodiscard]] const_reference front() const { return data_[0]; }
+
+    [[nodiscard]] reference front() {
+        return const_cast<T*&>(static_cast<const Vector*>(this)->front());
+    }
+
+    [[nodiscard]] const T* data() const { return data_; }
+
+    [[nodiscard]] T* data() {
+        return const_cast<T*>(static_cast<const Vector*>(this)->data());
+    }
+
+   private:
+    void AbortIfOverflow() {
+        if (N == size_) {
+            Abort(F("Vector capacity exceeded"));
+        }
+    }
+
     T* data_[N];
     uint16_t size_ = 0;
 };
