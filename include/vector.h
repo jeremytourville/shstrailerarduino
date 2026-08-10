@@ -13,6 +13,7 @@ namespace shstrailer {
 // used in an embedded environment. It has a fixed size capacity but has a
 // dynamic size that can go up to the fixed size. Erasing can only be done
 // through pop_back() and clear().
+// Not ideal for storing primitive types, it is designed for storing objects.
 //
 template <typename T, const uint16_t N = 16>
 class Vector {

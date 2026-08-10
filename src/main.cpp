@@ -6,6 +6,7 @@
 #include "light_controller.h"
 #include "pins.h"
 #include "safety.h"
+#include "screen.h"
 #include "vector.h"
 #include "version.h"
 #include "winch.h"
@@ -25,6 +26,7 @@ WinchController winch;
 SafetyController safety;
 
 FrameRateMonitor frameRateMonitor;
+Screen screen;
 
 void initializeLights(LightController& lightControllerLocal) {
     lightControllerLocal.registerLight(LIGHT1_OUT);
@@ -97,6 +99,8 @@ void setup() {
     initializeButtons(lightController, winch);
 
     cout << F("System Ready") << endl;
+
+    screen.drawText(0, 0, "hello world");
 }
 
 void loop() {

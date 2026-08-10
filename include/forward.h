@@ -29,4 +29,9 @@ inline constexpr T&& forward(
     return static_cast<T&&>(type);
 }
 
+template <typename T>
+constexpr typename remove_reference<T>::type&& move(T&& arg) noexcept {
+    return static_cast<typename remove_reference<T>::type&&>(arg);
+}
+
 }  // namespace shstrailer

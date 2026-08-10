@@ -1,0 +1,17 @@
+# Set the default behavior to automatically normalize line endings
+* text=auto
+
+# Force LF line endings for all text files upon checkout and commit
+* text eol=lf
+
+# Explicitly ensure code files use LF (optional but recommended)
+*.cpp text eol=lf
+*.h text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+
+# Deny Git from modifying binary files
+*.png binary
+*.jpg binary
+*.pdf binary
+*.docx binary

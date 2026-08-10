@@ -8,7 +8,7 @@ namespace shstrailer {
 
 class EndLine {};
 
-inline EndLine endl;
+constexpr inline EndLine endl;
 
 class Console {
    public:
