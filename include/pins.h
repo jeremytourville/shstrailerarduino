@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <Arduino.h>  // for A0
 
 namespace shstrailer {
 

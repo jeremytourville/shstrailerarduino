@@ -62,8 +62,8 @@ class Screen : public BatteryObserver,
     BatteryState batteryState_ = BatteryState::OK;
     float batteryVoltage_ = 0.0f;
     bool drawHeartbeat_ = false;
-    WinchState winchState_;
-    Timer::Stamp winchCooldownTimeRemaining_;
+    WinchState winchState_ = WinchState::IDLE;
+    Timer::Stamp winchCooldownTimeRemaining_ = 0;
     Timer timer_;
 };
 
