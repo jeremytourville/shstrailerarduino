@@ -23,10 +23,11 @@ float AVRBatteryReader::readVoltage() {
         adcTotal += analogRead(BATTERY_VOLTAGE_PIN);
     }
 
-    const float adcAverage = (float)adcTotal / (float)kAverageSamples;
+    const float adcAverage =
+        static_cast<float>(adcTotal) / static_cast<float>(kAverageSamples);
 
     const float vPin =
-        (adcAverage * kADCReferenceVoltage) / (float)kADCMaxCounts;
+        (adcAverage * kADCReferenceVoltage) / static_cast<float>(kADCMaxCounts);
 
     const float dividerRatio =
         (kVoltageDividerR1 + kVoltageDividerR2) / kVoltageDividerR2;

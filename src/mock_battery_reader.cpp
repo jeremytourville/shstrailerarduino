@@ -2,8 +2,6 @@
 
 #include <stdlib.h>
 
-#include "console.h"
-
 namespace shstrailer {
 
 namespace {
@@ -15,16 +13,18 @@ namespace {
 }  // namespace
 
 float MockBatteryReader::readVoltage() {
-    if (simulationTimer_.elapsed() < 60000) {
+    const auto elapsed = simulationTimer_.elapsed();
+
+    if (elapsed < 60000) {
         // simulate an ok battery
         delta_ = 0.0f;
-    } else if (simulationTimer_.elapsed() < 180000) {
+    } else if (elapsed < 180000) {
         // simulate a draining battery
         delta_ = -0.001f;
-    } else if (simulationTimer_.elapsed() < 240000) {
+    } else if (elapsed < 240000) {
         // simulate a draining battery
         delta_ = -0.002f;
-    } else if (simulationTimer_.elapsed() < 300000) {
+    } else if (elapsed < 300000) {
         // simulate a charging battery
         delta_ = 0.0015f;
     }

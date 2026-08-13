@@ -6,7 +6,7 @@ class BatteryReader {
    public:
     virtual ~BatteryReader() = default;
 
-    [[nodiscard]] virtual float readVoltage() { return 0.0f; }
+    [[nodiscard]] virtual float readVoltage() = 0;
 };
 
 }  // namespace shstrailer
