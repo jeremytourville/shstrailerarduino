@@ -13,6 +13,7 @@ namespace shstrailer {
 // used in an embedded environment. It has a fixed size capacity but has a
 // dynamic size that can go up to the fixed size. Erasing can only be done
 // through pop_back() and clear().
+// Not ideal for storing primitive types, it is designed for storing objects.
 //
 template <typename T, const uint16_t N = 16>
 class Vector {
@@ -24,7 +25,7 @@ class Vector {
     template <typename I>
     class iterator {
        public:
-        iterator(I** ptr) : ptr_(ptr) {}
+        explicit iterator(I** ptr) : ptr_(ptr) {}
 
         iterator& operator++() {
             ++ptr_;
@@ -54,7 +55,7 @@ class Vector {
     template <typename I>
     class const_iterator {
        public:
-        const_iterator(I* const* ptr) : ptr_(ptr) {}
+        explicit const_iterator(I* const* ptr) : ptr_(ptr) {}
 
         const_iterator& operator++() {
             ++ptr_;
@@ -218,7 +219,7 @@ class Vector<T*, N> {
     template <typename I>
     class iterator {
        public:
-        iterator(I** ptr) : ptr_(ptr) {}
+        explicit iterator(I** ptr) : ptr_(ptr) {}
 
         iterator& operator++() {
             ++ptr_;
@@ -248,7 +249,7 @@ class Vector<T*, N> {
     template <typename I>
     class const_iterator {
        public:
-        const_iterator(I* const* ptr) : ptr_(ptr) {}
+        explicit const_iterator(I* const* ptr) : ptr_(ptr) {}
 
         const_iterator& operator++() {
             ++ptr_;

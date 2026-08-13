@@ -1,45 +1,58 @@
 #pragma once
 
-#include <Arduino.h>
-
-#include "button_observer.hpp"
 #include "config.h"
+#include "observers/button_observer.h"
+#include "observers/winch_observer.h"
 #include "pins.h"
+#include "timer.h"
 #include "types.h"
+#include "vector.h"
 
 namespace shstrailer {
 
 class WinchController : public ButtonObserver {
    public:
-    WinchController();
     void begin();
+
     void update();
+
     void commandUp();
+
     void commandDown();
+
     void stop();
-    [[nodiscard]] bool isFaulted() const;
-    [[nodiscard]] bool isCoolingDown() const;
-    [[nodiscard]] WinchState state() const;
-    [[nodiscard]] uint32_t cooldownRemainingMs() const;
 
-    void onContinuousPress(uint8_t pin) override;
+    [[nodiscard]] Timer::Duration cooldownRemainingMs() const;
 
-    void onReleased(uint8_t pin) override;
+    void onButtonContinuousPress(uint8_t pin) override;
+
+    void onButtonReleased(uint8_t pin) override;
+
+    void registerObserver(WinchObserver* observer);
 
    private:
-    WinchState m_state;
-    WinchDirection m_requested;
-    uint32_t m_stateTimer;
-    uint32_t m_runStartTime;
-    uint32_t m_cooldownStartTime;
-    uint32_t m_requiredCooldownMs;
-    bool m_coolingDown;
-
     void setOutputs(bool up, bool down);
-    void beginRun(WinchDirection direction, uint32_t now);
-    void endRunAndStartCooldown(uint32_t now);
-    void enterFault(uint32_t now);
-    void updateCooldown(uint32_t now);
+
+    void beginRun(WinchDirection direction, const Timer& now);
+
+    void endRunAndStartCooldown(const Timer& now);
+
+    void enterFault(const Timer& now);
+
+    void updateCooldown(const Timer& now);
+
+    void setState(WinchState state);
+
+    void notify();
+
+    WinchState state_ = WinchState::IDLE;
+    WinchDirection requested_ = WinchDirection::STOP;
+    Timer stateTimer_;
+    Timer runStartTime_;
+    Timer cooldownStartTime_;
+    Timer::Duration requiredCooldownMs_;
+    bool coolingDown_ = false;
+    Vector<WinchObserver*, 2> observers_;
 };
 
 }  // namespace shstrailer

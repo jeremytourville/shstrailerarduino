@@ -1,11 +1,14 @@
 #include <Arduino.h>
 
+#include "battery.h"
 #include "button.h"
 #include "console.h"
 #include "frame_rate_monitor.h"
+#include "heartbeat.h"
 #include "light_controller.h"
 #include "pins.h"
-#include "safety.h"
+#include "screen.h"
+#include "status_led.h"
 #include "vector.h"
 #include "version.h"
 #include "winch.h"
@@ -22,9 +25,12 @@ Vector<Button, 12> allButtons;
 //
 LightController lightController;
 WinchController winch;
-SafetyController safety;
+Battery battery;
+HeartBeat heartBeat;
+StatusLED statusLED;
 
 FrameRateMonitor frameRateMonitor;
+Screen screen;
 
 void initializeLights(LightController& lightControllerLocal) {
     lightControllerLocal.registerLight(LIGHT1_OUT);
@@ -87,14 +93,20 @@ void setup() {
 
     // Initialize output-owning controllers first so outputs are immediately
     // configured and forced to their safe OFF states.
-    safety.begin();
     winch.begin();
 
     initializeLights(lightController);
 
-    safety.safeStartup();
-
     initializeButtons(lightController, winch);
+
+    battery.registerObserver(&screen);
+    battery.registerObserver(&statusLED);
+
+    heartBeat.registerObserver(&screen);
+    heartBeat.registerObserver(&statusLED);
+
+    winch.registerObserver(&screen);
+    winch.registerObserver(&statusLED);
 
     cout << F("System Ready") << endl;
 }
@@ -106,10 +118,10 @@ void loop() {
     }
 
     winch.update();
-
-    safety.setWinchFault(winch.isFaulted());
-    safety.setWinchCooldown(winch.isCoolingDown());
-    safety.update();
+    battery.update();
+    heartBeat.update();
+    statusLED.update();
+    screen.update();
 
     frameRateMonitor.update();
 }

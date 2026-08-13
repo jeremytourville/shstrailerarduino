@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Arduino.h>
+#include <stdint.h>
 
 #include "config.h"
 
@@ -8,7 +8,7 @@ namespace shstrailer {
 
 class EndLine {};
 
-inline EndLine endl;
+constexpr inline EndLine endl;
 
 class Console {
    public:

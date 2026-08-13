@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#include "button_observer.hpp"
+#include "observers/button_observer.h"
 
 namespace shstrailer {
 
@@ -10,7 +10,7 @@ class Light : public ButtonObserver {
    public:
     explicit Light(uint8_t pin);
 
-    void onPressed(uint8_t pin) override;
+    void onButtonPressed(uint8_t pin) override;
 
     void on();
 

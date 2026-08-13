@@ -8,7 +8,7 @@ void LightController::registerLight(const uint8_t pin) {
     lights_.emplace_back(pin);
 }
 
-void LightController::onLongPressed([[maybe_unused]] const uint8_t pin) {
+void LightController::onButtonLongPressed([[maybe_unused]] const uint8_t pin) {
     off();
 }
 
