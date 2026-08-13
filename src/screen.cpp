@@ -1,6 +1,7 @@
 #include "screen.h"
 
 #include <Adafruit_GFX.h>
+#include <stdio.h>
 
 #include "algorithm.h"
 #include "console.h"
