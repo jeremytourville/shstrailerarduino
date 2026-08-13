@@ -40,7 +40,8 @@ void Battery::update() {
             stateTimer_.start();
             potentialState_ = BatteryState::WARNING;
         }
-    } else {
+    } else if (BatteryState::OK != potentialState_) {
+        stateTimer_.start();
         potentialState_ = BatteryState::OK;
     }
 
@@ -60,7 +61,7 @@ void Battery::registerObserver(BatteryObserver* observer) {
     observers_.push_back(observer);
 
     // provide initial state
-    notifyState();
+    observer->onBatteryState(state_);
 }
 
 void Battery::notifyVoltage() {

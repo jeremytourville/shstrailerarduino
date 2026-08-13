@@ -227,6 +227,8 @@ void WinchController::registerObserver(WinchObserver* observer) {
     }
 
     observers_.push_back(observer);
+
+    observer->onWinchState(state_, cooldownRemainingMs());
 }
 
 void WinchController::notify() {

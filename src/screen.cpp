@@ -29,13 +29,10 @@ Screen::Screen() : display_(128, 64) {
 
 void Screen::onBatteryVoltage(const float voltage) {
     batteryVoltage_ = voltage;
-    batteryVoltage_ = 9.99f;
 }
 
 void Screen::onBatteryState([[maybe_unused]] const BatteryState state) {
     batteryState_ = state;
-    // batteryState_ = BatteryState::CRITICAL;
-    batteryState_ = BatteryState::WARNING;
 }
 
 void Screen::onWinchState(const WinchState state,
