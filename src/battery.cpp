@@ -10,15 +10,12 @@ namespace {
 constexpr Timer::Duration kSampleInterval = 250;
 constexpr Timer::Duration kStableStateDuration =
     1000UL * 60UL * 30UL;  // 30 minutes
-constexpr uint8_t kAverageSamples = 8;
-constexpr float kADCReferenceVoltage = 5.0f;
-constexpr uint16_t kADCMaxCounts = 1023;
-constexpr float kVoltageDividerR1 = 100000.0f;
-constexpr float kVoltageDividerR2 = 33000.0f;
 constexpr float kWarningVoltage = 12.20f;
 constexpr float kCriticalVoltage = 11.80f;
 
 }  // namespace
+
+Battery::Battery(BatteryReader& reader) : reader_(reader) {}
 
 void Battery::update() {
     if (sampleTimer_.elapsed() < kSampleInterval) {
@@ -27,7 +24,7 @@ void Battery::update() {
 
     sampleTimer_.start();
 
-    readVoltage();
+    voltage_ = reader_.readVoltage();
 
     notifyVoltage();
 
@@ -76,24 +73,6 @@ void Battery::notifyState() {
     for (auto* observer : observers_) {
         observer->onBatteryState(state_);
     }
-}
-
-void Battery::readVoltage() {
-    uint32_t adcTotal = 0;
-
-    for (uint8_t i = 0; i < kAverageSamples; ++i) {
-        adcTotal += analogRead(BATTERY_VOLTAGE_PIN);
-    }
-
-    const float adcAverage = (float)adcTotal / (float)kAverageSamples;
-
-    const float vPin =
-        (adcAverage * kADCReferenceVoltage) / (float)kADCMaxCounts;
-
-    const float dividerRatio =
-        (kVoltageDividerR1 + kVoltageDividerR2) / kVoltageDividerR2;
-
-    voltage_ = vPin * dividerRatio;
 }
 
 }  // namespace shstrailer

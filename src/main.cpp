@@ -1,11 +1,13 @@
 #include <Arduino.h>
 
+#include "avr_battery_reader.h"
 #include "battery.h"
 #include "button.h"
 #include "console.h"
 #include "frame_rate_monitor.h"
 #include "heartbeat.h"
 #include "light_controller.h"
+#include "mock_battery_reader.h"
 #include "pins.h"
 #include "screen.h"
 #include "status_led.h"
@@ -25,7 +27,9 @@ Vector<Button, 12> allButtons;
 //
 LightController lightController;
 WinchController winch;
-Battery battery;
+AVRBatteryReader batteryReader;
+// MockBatteryReader batteryReader;
+Battery battery(batteryReader);
 HeartBeat heartBeat;
 StatusLED statusLED;
 
