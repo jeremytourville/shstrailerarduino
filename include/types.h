@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 namespace shstrailer {
 
 enum class WinchDirection : uint8_t { STOP = 0, UP, DOWN };
