@@ -25,7 +25,7 @@ class Vector {
     template <typename I>
     class iterator {
        public:
-        iterator(I** ptr) : ptr_(ptr) {}
+        explicit iterator(I** ptr) : ptr_(ptr) {}
 
         iterator& operator++() {
             ++ptr_;
@@ -55,7 +55,7 @@ class Vector {
     template <typename I>
     class const_iterator {
        public:
-        const_iterator(I* const* ptr) : ptr_(ptr) {}
+        explicit const_iterator(I* const* ptr) : ptr_(ptr) {}
 
         const_iterator& operator++() {
             ++ptr_;
@@ -219,7 +219,7 @@ class Vector<T*, N> {
     template <typename I>
     class iterator {
        public:
-        iterator(I** ptr) : ptr_(ptr) {}
+        explicit iterator(I** ptr) : ptr_(ptr) {}
 
         iterator& operator++() {
             ++ptr_;
@@ -249,7 +249,7 @@ class Vector<T*, N> {
     template <typename I>
     class const_iterator {
        public:
-        const_iterator(I* const* ptr) : ptr_(ptr) {}
+        explicit const_iterator(I* const* ptr) : ptr_(ptr) {}
 
         const_iterator& operator++() {
             ++ptr_;
