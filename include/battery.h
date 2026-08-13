@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include "battery_reader.h"
 #include "observers/battery_observer.h"
 #include "timer.h"
 #include "types.h"
@@ -11,13 +12,13 @@ namespace shstrailer {
 
 class Battery {
    public:
+    explicit Battery(BatteryReader& reader);
+
     void update();
 
     void registerObserver(BatteryObserver* observer);
 
    private:
-    void readVoltage();
-
     void notifyVoltage();
 
     void notifyState();
@@ -28,6 +29,7 @@ class Battery {
     Timer sampleTimer_;
     Timer stateTimer_;
     Vector<BatteryObserver*, 2> observers_;
+    BatteryReader& reader_;
 };
 
 }  // namespace shstrailer
