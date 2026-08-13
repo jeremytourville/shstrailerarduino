@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <Arduino.h>
 
 #include "timer.h"
 #include "vector.h"
