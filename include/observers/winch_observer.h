@@ -11,7 +11,7 @@ class WinchObserver {
 
     virtual void onWinchState(
         [[maybe_unused]] WinchState state,
-        [[maybe_unused]] Timer::Stamp cooldownTimeRemaining) {}
+        [[maybe_unused]] Timer::Duration cooldownTimeRemaining) {}
 };
 
 }  // namespace shstrailer

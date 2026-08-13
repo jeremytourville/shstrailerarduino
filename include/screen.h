@@ -22,13 +22,11 @@ class Screen : public BatteryObserver,
     void onBatteryState(BatteryState state) override;
 
     void onWinchState(WinchState state,
-                      Timer::Stamp cooldownTimeRemaining) override;
+                      Timer::Duration cooldownTimeRemaining) override;
 
     void onHeartBeat() override;
 
-    void beginDisplay();
-
-    void endDisplay();
+    void update();
 
    private:
     [[nodiscard]] bool initialize();
@@ -63,7 +61,7 @@ class Screen : public BatteryObserver,
     float batteryVoltage_ = 0.0f;
     bool drawHeartbeat_ = false;
     WinchState winchState_ = WinchState::IDLE;
-    Timer::Stamp winchCooldownTimeRemaining_ = 0;
+    Timer::Duration winchCooldownTimeRemaining_ = 0;
     Timer timer_;
 };
 

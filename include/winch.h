@@ -4,6 +4,7 @@
 #include "observers/button_observer.h"
 #include "observers/winch_observer.h"
 #include "pins.h"
+#include "timer.h"
 #include "types.h"
 #include "vector.h"
 
@@ -11,16 +12,17 @@ namespace shstrailer {
 
 class WinchController : public ButtonObserver {
    public:
-    WinchController();
     void begin();
+
     void update();
+
     void commandUp();
+
     void commandDown();
+
     void stop();
-    [[nodiscard]] bool isFaulted() const;
-    [[nodiscard]] bool isCoolingDown() const;
-    [[nodiscard]] WinchState state() const;
-    [[nodiscard]] uint32_t cooldownRemainingMs() const;
+
+    [[nodiscard]] Timer::Duration cooldownRemainingMs() const;
 
     void onButtonContinuousPress(uint8_t pin) override;
 
@@ -31,25 +33,25 @@ class WinchController : public ButtonObserver {
    private:
     void setOutputs(bool up, bool down);
 
-    void beginRun(WinchDirection direction, uint32_t now);
+    void beginRun(WinchDirection direction, const Timer& now);
 
-    void endRunAndStartCooldown(uint32_t now);
+    void endRunAndStartCooldown(const Timer& now);
 
-    void enterFault(uint32_t now);
+    void enterFault(const Timer& now);
 
-    void updateCooldown(uint32_t now);
+    void updateCooldown(const Timer& now);
 
     void setState(WinchState state);
 
     void notify();
 
-    WinchState state_;
-    WinchDirection requested_;
-    uint32_t stateTimer_;
-    uint32_t runStartTime_;
-    uint32_t cooldownStartTime_;
-    uint32_t requiredCooldownMs_;
-    bool coolingDown_;
+    WinchState state_ = WinchState::IDLE;
+    WinchDirection requested_ = WinchDirection::STOP;
+    Timer stateTimer_;
+    Timer runStartTime_;
+    Timer cooldownStartTime_;
+    Timer::Duration requiredCooldownMs_;
+    bool coolingDown_ = false;
     Vector<WinchObserver*, 2> observers_;
 };
 

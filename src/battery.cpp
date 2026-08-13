@@ -7,8 +7,9 @@ namespace shstrailer {
 
 namespace {
 
-constexpr Timer::Stamp kSampleInterval = 250;
-constexpr Timer::Stamp kStateDuration = 1000UL * 60UL * 30UL;  // 30 minutes
+constexpr Timer::Duration kSampleInterval = 250;
+constexpr Timer::Duration kStableStateDuration =
+    1000UL * 60UL * 30UL;  // 30 minutes
 constexpr uint8_t kAverageSamples = 8;
 constexpr float kADCReferenceVoltage = 5.0f;
 constexpr uint16_t kADCMaxCounts = 1023;
@@ -47,7 +48,8 @@ void Battery::update() {
 
     // The battery has been in a new potential state long enough
     // to set it as that state.
-    if (state_ != potentialState_ && stateTimer_.elapsed() > kStateDuration) {
+    if (state_ != potentialState_ &&
+        stateTimer_.elapsed() > kStableStateDuration) {
         state_ = potentialState_;
         notifyState();
     }

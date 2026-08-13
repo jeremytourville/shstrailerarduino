@@ -5,6 +5,13 @@
 
 namespace shstrailer {
 
+namespace {
+
+constexpr Timer::Duration kDebounceDuration = 30;
+constexpr Timer::Duration kLongPressDuration = 2000;
+
+}  // namespace
+
 Button::Button(const uint8_t pin) : pin_(pin) {
     pinMode(pin_, INPUT_PULLUP);
     lastDebounceState_ = state_ = digitalRead(pin_);

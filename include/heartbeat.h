@@ -9,7 +9,7 @@ class HeartBeatObserver;
 
 class HeartBeat {
    public:
-    explicit HeartBeat(Timer::Stamp duration = 1000);
+    explicit HeartBeat(Timer::Duration duration = 1000);
 
     void update();
 
@@ -19,7 +19,7 @@ class HeartBeat {
     void notify();
 
     Timer timer_;
-    Timer::Stamp duration_;
+    Timer::Duration duration_;
     Vector<HeartBeatObserver*, 2> observers_;
 };
 

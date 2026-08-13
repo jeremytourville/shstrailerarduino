@@ -1,7 +1,6 @@
 #include "timer.h"
 
 #include <Arduino.h>
-#include <limits.h>
 
 namespace shstrailer {
 
@@ -12,18 +11,18 @@ Timer::Timer() {
     start();
 }
 
-void Timer::start() { startTime_ = millis(); }
+void Timer::start() { stamp_ = millis(); }
 
-Timer::Stamp Timer::elapsed() const {
-    const Stamp now = millis();
+Timer::Duration Timer::elapsed() const { return duration(millis(), stamp_); }
 
+Timer::Duration Timer::duration(const Stamp lhs, const Stamp rhs) {
     // normally time will be monotonic
-    if (now >= startTime_) {
-        return now - startTime_;
+    if (lhs >= rhs) {
+        return lhs - rhs;
     }
 
     // if we get here, millis() has wrapped around since start() was called
-    return (ULONG_MAX - startTime_ + 1) + now;
+    return (ULONG_MAX - rhs + 1) + lhs;
 }
 
 }  // namespace shstrailer

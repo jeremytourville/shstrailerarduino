@@ -8,7 +8,6 @@
 #include "light_controller.h"
 #include "pins.h"
 #include "screen.h"
-#include "screen_sentinel.h"
 #include "status_led.h"
 #include "vector.h"
 #include "version.h"
@@ -113,8 +112,6 @@ void setup() {
 }
 
 void loop() {
-    const ScreenSentinel screenSentinel(screen);
-
     // Update all buttons.
     for (auto& button : allButtons) {
         button.update();
@@ -124,6 +121,7 @@ void loop() {
     battery.update();
     heartBeat.update();
     statusLED.update();
+    screen.update();
 
     frameRateMonitor.update();
 }

@@ -19,7 +19,7 @@ class StatusLED : public HeartBeatObserver,
     void onHeartBeat() override;
 
     void onWinchState(WinchState state,
-                      Timer::Stamp cooldownTimeRemaining) override;
+                      Timer::Duration cooldownTimeRemaining) override;
 
     void onBatteryState(BatteryState state) override;
 
@@ -29,8 +29,8 @@ class StatusLED : public HeartBeatObserver,
     Timer timer_;
     bool initialized_ = false;
     uint8_t state_ = LOW;
-    Timer::Stamp winchDelay_ = ULONG_MAX;
-    Timer::Stamp batteryDelay_ = ULONG_MAX;
+    Timer::Duration winchDelay_ = ULONG_MAX;
+    Timer::Duration batteryDelay_ = ULONG_MAX;
 };
 
 }  // namespace shstrailer

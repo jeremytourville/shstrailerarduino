@@ -7,27 +7,18 @@ namespace shstrailer {
 namespace {
 
 // Winch protection
-constexpr Timer::Stamp WINCH_DIRECTION_DELAY_MS = 250;
+constexpr Timer::Duration WINCH_DIRECTION_DELAY_MS = 250;
 
 // Manufacturer duty-cycle limit:
 // Maximum continuous run: 45 seconds.
 // 5% duty cycle means 19 seconds OFF for every 1 second ON.
 // Therefore, a full 45-second run requires 855 seconds (14 min 15 sec) OFF.
-constexpr Timer::Stamp WINCH_MAX_CONTINUOUS_RUNTIME_MS = 45000UL;
+constexpr Timer::Duration WINCH_MAX_CONTINUOUS_RUNTIME_MS = 45000UL;
 constexpr uint8_t WINCH_DUTY_PERCENT = 5;
 constexpr uint8_t WINCH_OFF_TO_ON_RATIO =
     (100U - WINCH_DUTY_PERCENT) / WINCH_DUTY_PERCENT;
 
 }  // namespace
-
-WinchController::WinchController()
-    : state_(WinchState::IDLE),
-      requested_(WinchDirection::STOP),
-      stateTimer_(0),
-      runStartTime_(0),
-      cooldownStartTime_(0),
-      requiredCooldownMs_(0),
-      coolingDown_(false) {}
 
 void WinchController::begin() {
     pinMode(WINCH_UP_OUT, OUTPUT);
@@ -35,7 +26,7 @@ void WinchController::begin() {
     setOutputs(false, false);
 
     requested_ = WinchDirection::STOP;
-    const uint32_t now = millis();
+    const Timer now;
     stateTimer_ = now;
     runStartTime_ = now;
     cooldownStartTime_ = now;
@@ -62,7 +53,7 @@ void WinchController::setOutputs(bool up, bool down) {
 }
 
 void WinchController::beginRun(const WinchDirection direction,
-                               const uint32_t now) {
+                               const Timer& now) {
     if (coolingDown_ || direction == WinchDirection::STOP) {
         setOutputs(false, false);
         return;
@@ -79,7 +70,7 @@ void WinchController::beginRun(const WinchDirection direction,
     }
 }
 
-void WinchController::endRunAndStartCooldown(const uint32_t now) {
+void WinchController::endRunAndStartCooldown(const Timer& now) {
     setOutputs(false, false);
 
     const uint32_t runTimeMs = now - runStartTime_;
@@ -94,17 +85,17 @@ void WinchController::endRunAndStartCooldown(const uint32_t now) {
     coolingDown_ = (requiredCooldownMs_ > 0);
 }
 
-void WinchController::enterFault(const uint32_t now) {
+void WinchController::enterFault(const Timer& now) {
     endRunAndStartCooldown(now);
     setState(WinchState::FAULT);
 }
 
-void WinchController::updateCooldown(const uint32_t now) {
+void WinchController::updateCooldown(const Timer& now) {
     if (!coolingDown_) {
         return;
     }
 
-    if ((uint32_t)(now - cooldownStartTime_) >= requiredCooldownMs_) {
+    if (now - cooldownStartTime_ >= requiredCooldownMs_) {
         coolingDown_ = false;
         requiredCooldownMs_ = 0;
     }
@@ -113,7 +104,8 @@ void WinchController::updateCooldown(const uint32_t now) {
 }
 
 void WinchController::update() {
-    const uint32_t now = millis();
+    const Timer now;
+
     updateCooldown(now);
 
     switch (state_) {
@@ -125,6 +117,7 @@ void WinchController::update() {
                 else if (requested_ == WinchDirection::DOWN)
                     beginRun(WinchDirection::DOWN, now);
             }
+
             break;
 
         case WinchState::RUNNING_UP:
@@ -135,10 +128,11 @@ void WinchController::update() {
                 endRunAndStartCooldown(now);
                 setState(WinchState::DIRECTION_DELAY);
                 stateTimer_ = now;
-            } else if ((uint32_t)(now - runStartTime_) >=
+            } else if ((now - runStartTime_) >=
                        WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
                 enterFault(now);
             }
+
             break;
 
         case WinchState::RUNNING_DOWN:
@@ -149,43 +143,41 @@ void WinchController::update() {
                 endRunAndStartCooldown(now);
                 setState(WinchState::DIRECTION_DELAY);
                 stateTimer_ = now;
-            } else if ((uint32_t)(now - runStartTime_) >=
+            } else if ((now - runStartTime_) >=
                        WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
                 enterFault(now);
             }
+
             break;
 
         case WinchState::DIRECTION_DELAY:
             setOutputs(false, false);
+
             if (requested_ == WinchDirection::STOP) {
                 setState(WinchState::IDLE);
-            } else if ((uint32_t)(now - stateTimer_) >=
-                       WINCH_DIRECTION_DELAY_MS) {
+            } else if ((now - stateTimer_) >= WINCH_DIRECTION_DELAY_MS) {
                 setState(WinchState::IDLE);
             }
+
             break;
 
         case WinchState::FAULT:
             setOutputs(false, false);
+
             if (requested_ == WinchDirection::STOP && !coolingDown_) {
                 setState(WinchState::IDLE);
             }
+
             break;
     }
 }
 
-bool WinchController::isFaulted() const { return WinchState::FAULT == state_; }
-
-bool WinchController::isCoolingDown() const { return coolingDown_; }
-
-WinchState WinchController::state() const { return state_; }
-
-uint32_t WinchController::cooldownRemainingMs() const {
+Timer::Duration WinchController::cooldownRemainingMs() const {
     if (!coolingDown_) {
         return 0;
     }
 
-    const uint32_t elapsed = millis() - cooldownStartTime_;
+    const auto elapsed = Timer() - cooldownStartTime_;
 
     if (elapsed >= requiredCooldownMs_) {
         return 0;

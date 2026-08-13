@@ -5,7 +5,7 @@
 
 namespace shstrailer {
 
-HeartBeat::HeartBeat(const Timer::Stamp duration) : duration_(duration) {}
+HeartBeat::HeartBeat(const Timer::Duration duration) : duration_(duration) {}
 
 void HeartBeat::registerObserver(HeartBeatObserver* observer) {
     if (nullptr == observer) {

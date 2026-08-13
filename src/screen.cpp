@@ -19,7 +19,7 @@ const uint8_t kHeartBitmap[] PROGMEM = {
     0x00   // 00000000 -> . . . . . . . (Row 7 - Bottom Spacing)
 };
 
-constexpr Timer::Stamp kFrameDuration = 250;
+constexpr Timer::Duration kFrameDuration = 250;
 
 }  // namespace
 
@@ -36,22 +36,14 @@ void Screen::onBatteryState([[maybe_unused]] const BatteryState state) {
 }
 
 void Screen::onWinchState(const WinchState state,
-                          const Timer::Stamp cooldownTimeRemaining) {
+                          const Timer::Duration cooldownTimeRemaining) {
     winchState_ = state;
     winchCooldownTimeRemaining_ = cooldownTimeRemaining;
 }
 
 void Screen::onHeartBeat() { drawHeartbeat_ = !drawHeartbeat_; }
 
-void Screen::beginDisplay() {
-    if (!initialize()) {
-        return;
-    }
-
-    display_.clearDisplay();
-}
-
-void Screen::endDisplay() {
+void Screen::update() {
     if (!initialize()) {
         return;
     }
@@ -62,6 +54,7 @@ void Screen::endDisplay() {
     }
 
     timer_.start();
+    display_.clearDisplay();
 
     drawBatteryGroup();
 
@@ -73,41 +66,26 @@ void Screen::endDisplay() {
 }
 
 void Screen::drawBattery(const int16_t x, const int16_t y) {
-    if (BatteryState::CRITICAL == batteryState_ && !drawHeartbeat_) {
+    if (BatteryState::OK == batteryState_ ||
+        (BatteryState::CRITICAL == batteryState_ && !drawHeartbeat_)) {
         return;
     }
 
-    //  body
-    display_.drawRect(x + 2, y, 36, 10, SSD1309_PIXEL_ON);
+    // body
+    display_.drawRect(x, y + 1, 32, 16, SSD1309_PIXEL_ON);
 
-    // cap
-    display_.fillRect(x, y + 3, 2, 4, SSD1309_PIXEL_ON);
+    // negative terminal
+    display_.drawFastHLine(x + 5, y, 5, SSD1309_PIXEL_ON);
 
-    constexpr int16_t kCellWidth = 10;
-    constexpr int16_t kCellHeight = 6;
+    // positive terminal
+    display_.drawFastHLine(x + 22, y, 5, SSD1309_PIXEL_ON);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+    // negative sign
+    display_.drawFastHLine(x + 5, y + 8, 5, SSD1309_PIXEL_ON);
 
-    // intentional fall through
-    switch (batteryState_) {
-        case BatteryState::OK:
-            // cell 1
-            display_.fillRect(x + 4, y + 2, kCellWidth, kCellHeight,
-                              SSD1309_PIXEL_ON);
-        case BatteryState::WARNING:
-            // cell 2
-            display_.fillRect(x + 5 + kCellWidth, y + 2, kCellWidth,
-                              kCellHeight, SSD1309_PIXEL_ON);
-        case BatteryState::CRITICAL:
-            // cell 3
-            display_.fillRect(x + 6 + 2 * kCellWidth, y + 2, kCellWidth,
-                              kCellHeight, SSD1309_PIXEL_ON);
-
-            break;
-    }
-
-#pragma GCC diagnostic pop
+    // positive sign
+    display_.drawFastHLine(x + 22, y + 8, 5, SSD1309_PIXEL_ON);
+    display_.drawFastVLine(x + 24, y + 6, 5, SSD1309_PIXEL_ON);
 }
 
 void Screen::drawBatteryGroup() {
@@ -123,7 +101,7 @@ void Screen::drawBatteryGroup() {
         drawText(4, 10, buffer, 2);
     }
 
-    drawBattery(87, 2);
+    drawBattery(91, 4);
 }
 
 void Screen::drawWinchGroup() {
@@ -175,13 +153,13 @@ void Screen::drawCoolDownTimeRemaining() {
 }
 
 void Screen::drawStatusBar() {
-    display_.drawFastHLine(0, bottomHLineY_ + 1, 128, SSD1309_PIXEL_ON);
+    display_.drawFastHLine(0, bottomHLineY_, 128, SSD1309_PIXEL_ON);
 
     if (drawHeartbeat_) {
         display_.drawBitmap(3, 57, kHeartBitmap, 7, 7, SSD1309_PIXEL_ON);
     }
 
-    drawText(versionX_, versionY_ + 1, versionString_);
+    drawText(versionX_, versionY_, versionString_);
 }
 
 void Screen::drawText(const int16_t x, const int16_t y, const char* text,
@@ -212,7 +190,7 @@ bool Screen::initialize() {
                                &height);
 
         versionX_ = display_.width() - width;
-        versionY_ = display_.height() - height;
+        versionY_ = (display_.height() - height) + 1;
         bottomHLineY_ = versionY_ - 2;
     } else {
         available_ = false;
