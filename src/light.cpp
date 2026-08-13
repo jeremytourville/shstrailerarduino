@@ -7,7 +7,7 @@ Light::Light(const uint8_t pin) : pin_(pin) {
     off();
 }
 
-void Light::onPressed([[maybe_unused]] const uint8_t pin) {
+void Light::onButtonPressed([[maybe_unused]] const uint8_t pin) {
     write(HIGH == state_ ? LOW : HIGH);
 }
 

@@ -1,6 +1,7 @@
 #include "button.h"
 
-#include "button_observer.hpp"
+#include "abort.h"
+#include "observers/button_observer.h"
 
 namespace shstrailer {
 
@@ -57,7 +58,7 @@ void Button::update() {
 
 void Button::registerObserver(ButtonObserver* observer) {
     if (nullptr == observer) {
-        Abort(F("observer is nullptr"));
+        Abort(F("button observer nullptr"));
     }
 
     observers_.push_back(observer);
@@ -65,25 +66,25 @@ void Button::registerObserver(ButtonObserver* observer) {
 
 void Button::notifyPressed() {
     for (auto observer : observers_) {
-        observer->onPressed(pin_);
+        observer->onButtonPressed(pin_);
     }
 }
 
 void Button::notifyLongPressed() {
     for (auto observer : observers_) {
-        observer->onLongPressed(pin_);
+        observer->onButtonLongPressed(pin_);
     }
 }
 
 void Button::notifyContinuousPress() {
     for (auto observer : observers_) {
-        observer->onContinuousPress(pin_);
+        observer->onButtonContinuousPress(pin_);
     }
 }
 
 void Button::notifyReleased() {
     for (auto observer : observers_) {
-        observer->onReleased(pin_);
+        observer->onButtonReleased(pin_);
     }
 }
 

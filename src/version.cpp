@@ -1,17 +1,21 @@
 #include "version.h"
 
+#include <stdint.h>
 #include <stdio.h>
 
 namespace shstrailer {
 
 const char* GetVersionString() {
-    // 19 comes from: v65535.65535.65535\0
-    static char version_string[19];
+    static char buffer[kVersionBufferSize];
 
-    snprintf(version_string, sizeof(version_string), "v%hu.%hu.%hu",
-             kMajorVersion, kMinorVersion, kPatchVersion);
+    const int status = snprintf(buffer, kVersionBufferSize, "v%hu.%hu.%hu",
+                                kMajorVersion, kMinorVersion, kPatchVersion);
 
-    return version_string;
+    if (status < 0) {
+        snprintf(buffer, kVersionBufferSize, "fail");
+    }
+
+    return buffer;
 }
 
 }  // namespace shstrailer

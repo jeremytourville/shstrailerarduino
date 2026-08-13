@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Arduino.h>
-
 namespace shstrailer {
 
 enum class WinchDirection : uint8_t { STOP = 0, UP, DOWN };
@@ -14,19 +12,6 @@ enum class WinchState : uint8_t {
     FAULT
 };
 
-enum class SystemState : uint8_t { STARTUP = 0, READY, LOW_BATTERY, FAULT };
-
-struct Battery {
-    float voltage;
-    bool warning;
-    bool critical;
-};
-
-struct ControllerStatus {
-    SystemState systemState;
-    Battery battery;
-    bool winchFault;
-    bool winchCooldown;
-};
+enum class BatteryState : uint8_t { OK = 0, WARNING, CRITICAL };
 
 }  // namespace shstrailer
