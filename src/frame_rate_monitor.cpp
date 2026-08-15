@@ -21,7 +21,7 @@ float FrameRateMonitor::framesPerSecond() const {
         return 0.0f;
     }
 
-    return count_ / (timer_.elapsed() / 1000.0f);
+    return count_ / (elapsed / 1000.0f);
 }
 
 }  // namespace shstrailer

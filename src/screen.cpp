@@ -122,6 +122,9 @@ void Screen::drawWinchGroup() {
             break;
 
         case WinchState::FAULT:
+            // user most likely will never see this, because it happens during
+            // cooldown, plus it gives a sense that something is wrong and needs
+            // to be fixed but just the cooldown needs to clear.
             drawText(15, 37, "FAULT", 2);
             break;
 

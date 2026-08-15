@@ -93,7 +93,7 @@ void initializeButtons(LightController& lightControllerLocal,
 }
 
 void setup() {
-    cout << endl << FW_NAME << F(" ") << GetVersionString() << endl;
+    cout << endl << F("Trailer Controller ") << GetVersionString() << endl;
 
     // Initialize output-owning controllers first so outputs are immediately
     // configured and forced to their safe OFF states.
