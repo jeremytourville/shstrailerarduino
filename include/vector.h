@@ -173,20 +173,25 @@ class Vector {
         allocator_.clear();
     }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] const_reference back() const { return *data_[size_ - 1]; }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] reference back() {
         return const_cast<T&>(static_cast<const Vector*>(this)->back());
     }
 
+    // If empty() is true, the behavior is undefined.
     void pop_back() {
         back().~T();
         --size_;
         allocator_.pop_back();
     }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] const_reference front() const { return *data_[0]; }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] reference front() {
         return const_cast<T&>(static_cast<const Vector*>(this)->front());
     }
@@ -205,7 +210,7 @@ class Vector {
     }
 
     ObjectAllocator<T, N> allocator_;
-    T* data_[N];
+    T* data_[N] = {};
     uint16_t size_ = 0;
 };
 
@@ -345,14 +350,19 @@ class Vector<T*, N> {
 
     void clear() { size_ = 0; }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] const_reference back() const { return data_[size_ - 1]; }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] reference back() { return data_[size_ - 1]; }
 
+    // If empty() is true, the behavior is undefined.
     void pop_back() { --size_; }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] const_reference front() const { return data_[0]; }
 
+    // If empty() is true, the behavior is undefined.
     [[nodiscard]] reference front() {
         return const_cast<T*&>(static_cast<const Vector*>(this)->front());
     }
@@ -370,7 +380,7 @@ class Vector<T*, N> {
         }
     }
 
-    T* data_[N];
+    T* data_[N] = {};
     uint16_t size_ = 0;
 };
 

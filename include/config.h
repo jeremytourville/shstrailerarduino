@@ -4,8 +4,6 @@
 
 #include "timer.h"
 
-#define FW_NAME F("Trailer Controller")
-
 namespace shstrailer {
 
 constexpr bool ENABLE_SERIAL_DEBUG = true;

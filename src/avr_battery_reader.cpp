@@ -1,5 +1,6 @@
 #include "avr_battery_reader.h"
 
+#include <Arduino.h>
 #include <stdint.h>
 
 #include "pins.h"
@@ -17,6 +18,8 @@ constexpr float kVoltageDividerR2 = 33000.0f;
 }  // namespace
 
 float AVRBatteryReader::readVoltage() {
+    // This requires 5.0 volts to be used.
+
     uint32_t adcTotal = 0;
 
     for (uint8_t i = 0; i < kAverageSamples; ++i) {

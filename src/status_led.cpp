@@ -23,7 +23,8 @@ void StatusLED::update() {
 }
 
 void StatusLED::onHeartBeat() {
-    // If there is neither an active winch/battery state then use heartbeat.
+    // If there is neither an active winch/battery state then use heartbeat,
+    // otherwise update() will handle the led.
     if (ULONG_MAX == minimum(winchDelay_, batteryDelay_)) {
         toggle();
     }
