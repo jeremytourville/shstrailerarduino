@@ -21,6 +21,7 @@ const uint8_t kHeartBitmap[] PROGMEM = {
 };
 
 constexpr Timer::Duration kFrameDuration = 250;
+constexpr Timer::Duration kInitRetryDuration = 1000;
 
 }  // namespace
 
@@ -111,21 +112,9 @@ void Screen::drawWinchGroup() {
 
     drawText(8, 28, "WINCH", 1, SSD1309_PIXEL_OFF);
 
-    if (winchCooldownTimeRemaining_ > 0) {
-        drawCoolDownTimeRemaining();
-        return;
-    }
-
     switch (winchState_) {
         case WinchState::IDLE:
             drawText(15, 37, "READY", 2);
-            break;
-
-        case WinchState::FAULT:
-            // user most likely will never see this, because it happens during
-            // cooldown, plus it gives a sense that something is wrong and needs
-            // to be fixed but just the cooldown needs to clear.
-            drawText(15, 37, "FAULT", 2);
             break;
 
         case WinchState::RUNNING_UP:
@@ -136,8 +125,8 @@ void Screen::drawWinchGroup() {
             drawText(15, 37, "DOWN", 2);
             break;
 
-        case WinchState::DIRECTION_DELAY:
-            // intentionally blank
+        case WinchState::COOLING_DOWN:
+            drawCoolDownTimeRemaining();
             break;
     }
 }
@@ -180,11 +169,17 @@ void Screen::drawText(const int16_t x, const int16_t y, const char* text,
 
 bool Screen::initialize() {
     if (initialized_) {
-        return initialized_ && available_;
+        return true;
     }
 
+    // keep trying to connect to the screen
+    if (timer_.elapsed() < kInitRetryDuration) {
+        return false;
+    }
+
+    timer_.start();
+
     if (display_.begin()) {
-        available_ = true;
         timer_.start();
 
         int16_t junk = 0;
@@ -196,14 +191,10 @@ bool Screen::initialize() {
         versionX_ = display_.width() - width;
         versionY_ = (display_.height() - height) + 1;
         bottomHLineY_ = versionY_ - 2;
-    } else {
-        available_ = false;
-        cout << F("screen begin failed") << endl;
+        initialized_ = true;
     }
 
-    initialized_ = true;
-
-    return initialized_ && available_;
+    return initialized_;
 }
 
 const char* Screen::voltageToString() {

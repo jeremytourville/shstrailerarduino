@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <avr/wdt.h>
 
 #include "avr_battery_reader.h"
 #include "battery.h"
@@ -26,7 +27,7 @@ Vector<Button, 12> allButtons;
 // Controllers
 //
 LightController lightController;
-WinchController winch;
+Winch winch;
 AVRBatteryReader batteryReader;
 // MockBatteryReader batteryReader;
 Battery battery(batteryReader);
@@ -46,13 +47,7 @@ void initializeLights(LightController& lightControllerLocal) {
 }
 
 void initializeButtons(LightController& lightControllerLocal,
-                       WinchController& winchLocal) {
-    allButtons.emplace_back(WINCH_UP_SW);
-    allButtons.back().registerObserver(&winchLocal);
-
-    allButtons.emplace_back(WINCH_DN_SW);
-    allButtons.back().registerObserver(&winchLocal);
-
+                       Winch& winchLocal) {
     // map buttons to lights
     Light* light1 = lightControllerLocal.getLightByPin(LIGHT1_OUT);
     allButtons.emplace_back(L1_SW_A);
@@ -86,13 +81,23 @@ void initializeButtons(LightController& lightControllerLocal,
     allButtons.emplace_back(POD_LIGHT_SW);
     allButtons.back().registerObserver(podLight);
 
-    // register the light controller to turn off all lights on long press
+    // Register the light controller to turn off all lights on long press,
+    // exclude winch buttons by registering them after this loop.
     for (auto& button : allButtons) {
         button.registerObserver(&lightControllerLocal);
     }
+
+    allButtons.emplace_back(WINCH_UP_SW);
+    allButtons.back().registerObserver(&winchLocal);
+
+    allButtons.emplace_back(WINCH_DN_SW);
+    allButtons.back().registerObserver(&winchLocal);
 }
 
 void setup() {
+    // Reset MCU if loop() hangs >8s.
+    wdt_enable(WDTO_8S);
+
     cout << endl << F("Trailer Controller ") << GetVersionString() << endl;
 
     // Initialize output-owning controllers first so outputs are immediately
@@ -116,6 +121,8 @@ void setup() {
 }
 
 void loop() {
+    wdt_reset();
+
     // Update all buttons.
     for (auto& button : allButtons) {
         button.update();

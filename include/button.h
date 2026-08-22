@@ -22,7 +22,7 @@ class Button {
 
     void notifyLongPressed();
 
-    void notifyContinuousPress();
+    void notifyDown();
 
     void notifyReleased();
 

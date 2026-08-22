@@ -6,7 +6,7 @@ namespace shstrailer {
 
 constexpr uint16_t kMajorVersion = 1;
 constexpr uint16_t kMinorVersion = 0;
-constexpr uint16_t kPatchVersion = 0;
+constexpr uint16_t kPatchVersion = 1;
 
 // 19 comes from: v65535.65535.65535\0
 constexpr uint16_t kVersionBufferSize = 19;
