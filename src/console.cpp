@@ -4,6 +4,8 @@ namespace shstrailer {
 
 namespace {
 
+constexpr bool ENABLE_SERIAL_DEBUG = true;
+
 void Initialize(bool& initialized) {
     if (!initialized) {
         initialized = true;

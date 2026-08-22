@@ -8,7 +8,7 @@ T minimum(const T& a, const T& b) {
 }
 
 template <typename T>
-T maximum(const T a, const T b) {
+T maximum(const T& a, const T& b) {
     return (a > b) ? a : b;
 }
 
