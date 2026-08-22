@@ -1,231 +1,163 @@
 #include "winch.h"
 
 #include "abort.h"
+#include "algorithm.h"
+#include "console.h"
+#include "pins.h"
 
 namespace shstrailer {
 
 namespace {
 
-// Winch protection
-constexpr Timer::Duration WINCH_DIRECTION_DELAY_MS = 250;
-
 // Manufacturer duty-cycle limit:
 // Maximum continuous run: 45 seconds.
 // 5% duty cycle means 19 seconds OFF for every 1 second ON.
 // Therefore, a full 45-second run requires 855 seconds (14 min 15 sec) OFF.
-constexpr Timer::Duration WINCH_MAX_CONTINUOUS_RUNTIME_MS = 45000UL;
-constexpr uint8_t WINCH_DUTY_PERCENT = 5;
-constexpr uint8_t WINCH_OFF_TO_ON_RATIO =
-    (100U - WINCH_DUTY_PERCENT) / WINCH_DUTY_PERCENT;
+constexpr Timer::Duration kWinchMaxContinuousRuntimeMS = 45000UL;
+constexpr uint8_t kWinchDutyPercent = 5;
+constexpr uint8_t kWinchOffToOnRatio =
+    (100U - kWinchDutyPercent) / kWinchDutyPercent;
 
 }  // namespace
 
-void WinchController::begin() {
+void Winch::begin() {
     pinMode(WINCH_UP_OUT, OUTPUT);
     pinMode(WINCH_DN_OUT, OUTPUT);
-    setOutputs(false, false);
-
-    requested_ = WinchDirection::STOP;
-    const Timer now;
-    stateTimer_ = now;
-    runStartTime_ = now;
-    cooldownStartTime_ = now;
-    requiredCooldownMs_ = 0;
-    coolingDown_ = false;
-
-    setState(WinchState::IDLE);
+    digitalWrite(WINCH_UP_OUT, LOW);
+    digitalWrite(WINCH_DN_OUT, LOW);
+    timer_.start();
 }
 
-void WinchController::commandUp() { requested_ = WinchDirection::UP; }
+void Winch::update() {
+    // Allowed state transitions:
+    //
+    // IDLE -> RUNNING_UP/RUNNING_DOWN
+    // RUNNING_UP/RUNNING_DOWN -> COOLING_DOWN
+    // COOLING_DOWN -> IDLE
+    //
 
-void WinchController::commandDown() { requested_ = WinchDirection::DOWN; }
+    const auto elapsed = timer_.elapsed();
 
-void WinchController::stop() { requested_ = WinchDirection::STOP; }
-
-void WinchController::setOutputs(bool up, bool down) {
-    if (up && down) {
-        up = false;
-        down = false;
-    }
-
-    digitalWrite(WINCH_UP_OUT, up ? OUTPUT_ON : OUTPUT_OFF);
-    digitalWrite(WINCH_DN_OUT, down ? OUTPUT_ON : OUTPUT_OFF);
-}
-
-void WinchController::beginRun(const WinchDirection direction,
-                               const Timer& now) {
-    if (coolingDown_ || direction == WinchDirection::STOP) {
-        setOutputs(false, false);
-        return;
-    }
-
-    runStartTime_ = now;
-
-    if (direction == WinchDirection::UP) {
-        setOutputs(true, false);
-        setState(WinchState::RUNNING_UP);
-    } else {
-        setOutputs(false, true);
-        setState(WinchState::RUNNING_DOWN);
-    }
-}
-
-void WinchController::endRunAndStartCooldown(const Timer& now) {
-    setOutputs(false, false);
-
-    const uint32_t runTimeMs = now - runStartTime_;
-
-    if (runTimeMs > (UINT32_MAX / WINCH_OFF_TO_ON_RATIO)) {
-        requiredCooldownMs_ = UINT32_MAX;
-    } else {
-        requiredCooldownMs_ = runTimeMs * WINCH_OFF_TO_ON_RATIO;
-    }
-
-    cooldownStartTime_ = now;
-    coolingDown_ = (requiredCooldownMs_ > 0);
-}
-
-void WinchController::enterFault(const Timer& now) {
-    endRunAndStartCooldown(now);
-    setState(WinchState::FAULT);
-}
-
-void WinchController::updateCooldown(const Timer& now) {
-    if (!coolingDown_) {
-        return;
-    }
-
-    if (now - cooldownStartTime_ >= requiredCooldownMs_) {
-        coolingDown_ = false;
-        requiredCooldownMs_ = 0;
-    }
-
-    notify();
-}
-
-void WinchController::update() {
-    const Timer now;
-
-    updateCooldown(now);
+    // cout << F("elapsed: ") << elapsed << F(" requested: ") << int(requested_)
+    //    << endl;
 
     switch (state_) {
         case WinchState::IDLE:
-            setOutputs(false, false);
-            if (!coolingDown_) {
-                if (requested_ == WinchDirection::UP)
-                    beginRun(WinchDirection::UP, now);
-                else if (requested_ == WinchDirection::DOWN)
-                    beginRun(WinchDirection::DOWN, now);
+            if (WinchDirection::UP == requested_) {
+                setState(WinchState::RUNNING_UP, elapsed);
+            } else if (WinchDirection::DOWN == requested_) {
+                setState(WinchState::RUNNING_DOWN, elapsed);
             }
 
             break;
 
         case WinchState::RUNNING_UP:
-            if (requested_ == WinchDirection::STOP) {
-                endRunAndStartCooldown(now);
-                setState(WinchState::IDLE);
-            } else if (requested_ == WinchDirection::DOWN) {
-                endRunAndStartCooldown(now);
-                setState(WinchState::DIRECTION_DELAY);
-                stateTimer_ = now;
-            } else if ((now - runStartTime_) >=
-                       WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
-                enterFault(now);
-            }
-
-            break;
-
         case WinchState::RUNNING_DOWN:
-            if (requested_ == WinchDirection::STOP) {
-                endRunAndStartCooldown(now);
-                setState(WinchState::IDLE);
-            } else if (requested_ == WinchDirection::UP) {
-                endRunAndStartCooldown(now);
-                setState(WinchState::DIRECTION_DELAY);
-                stateTimer_ = now;
-            } else if ((now - runStartTime_) >=
-                       WINCH_MAX_CONTINUOUS_RUNTIME_MS) {
-                enterFault(now);
+            // intentional fall through
+
+            if (elapsed >= kWinchMaxContinuousRuntimeMS ||
+                WinchDirection::STOP == requested_) {
+                computeRequiredCooldownTime(elapsed);
+                setState(WinchState::COOLING_DOWN, elapsed);
             }
 
             break;
 
-        case WinchState::DIRECTION_DELAY:
-            setOutputs(false, false);
+        case WinchState::COOLING_DOWN:
+            notify(elapsed);
 
-            if (requested_ == WinchDirection::STOP) {
-                setState(WinchState::IDLE);
-            } else if ((now - stateTimer_) >= WINCH_DIRECTION_DELAY_MS) {
-                setState(WinchState::IDLE);
-            }
-
-            break;
-
-        case WinchState::FAULT:
-            setOutputs(false, false);
-
-            if (requested_ == WinchDirection::STOP && !coolingDown_) {
-                setState(WinchState::IDLE);
+            if (0 == cooldownTimeRemaining(elapsed)) {
+                setState(WinchState::IDLE, elapsed);
             }
 
             break;
     }
 }
 
-Timer::Duration WinchController::cooldownRemainingMs() const {
-    if (!coolingDown_) {
-        return 0;
-    }
+void Winch::computeRequiredCooldownTime(const Timer::Duration runTime) {
+    // Prevent someone from cycling the rocker switch back and forth quickly by
+    // requiring at least one second of runtime.
+    requiredCooldownMs_ =
+        maximum(kWinchOffToOnRatio * runTime, kWinchOffToOnRatio * 1000UL);
+}
 
-    const auto elapsed = Timer() - cooldownStartTime_;
-
-    if (elapsed >= requiredCooldownMs_) {
+Timer::Duration Winch::cooldownTimeRemaining(
+    const Timer::Duration elapsed) const {
+    if (WinchState::COOLING_DOWN != state_ || elapsed >= requiredCooldownMs_) {
         return 0;
     }
 
     return requiredCooldownMs_ - elapsed;
 }
 
-void WinchController::onButtonContinuousPress(const uint8_t pin) {
+void Winch::onButtonDown(const uint8_t pin) {
     // Winch is hold-to-run. Both buttons cannot be pressed because it uses a
     // momentary rocker.
     switch (pin) {
         case WINCH_UP_SW:
-            commandUp();
+            // ignore if does not match state
+            if (WinchState::RUNNING_DOWN != state_) {
+                requested_ = WinchDirection::UP;
+            }
+
             break;
         case WINCH_DN_SW:
-            commandDown();
+            // ignore if does not match state
+            if (WinchState::RUNNING_UP != state_) {
+                requested_ = WinchDirection::DOWN;
+            }
+
             break;
     }
 }
 
-void WinchController::onButtonReleased([[maybe_unused]] const uint8_t pin) {
+void Winch::onButtonReleased([[maybe_unused]] const uint8_t pin) {
     // Winch is subscribed only to WINCH_UP_SW and WINCH_DN_SW, no other
     // button will cause this to be called.
 
-    stop();
+    requested_ = WinchDirection::STOP;
 }
 
-void WinchController::setState(const WinchState state) {
-    if (state != state_) {
-        state_ = state;
-        notify();
+void Winch::setState(const WinchState state, const Timer::Duration elapsed) {
+    if (state == state_) {
+        return;
     }
+
+    if (WinchState::RUNNING_UP == state) {
+        digitalWrite(WINCH_UP_OUT, HIGH);
+        digitalWrite(WINCH_DN_OUT, LOW);
+    } else if (WinchState::RUNNING_DOWN == state) {
+        digitalWrite(WINCH_UP_OUT, LOW);
+        digitalWrite(WINCH_DN_OUT, HIGH);
+    } else {
+        // This would be IDLE or COOLING_DOWN
+        digitalWrite(WINCH_UP_OUT, LOW);
+        digitalWrite(WINCH_DN_OUT, LOW);
+    }
+
+    // Always restart the timer even though for IDLE it isn't used.
+    timer_.start();
+
+    state_ = state;
+
+    notify(elapsed);
 }
 
-void WinchController::registerObserver(WinchObserver* observer) {
+void Winch::registerObserver(WinchObserver* observer) {
     if (nullptr == observer) {
         Abort(F("winch observer nullptr"));
     }
 
     observers_.push_back(observer);
 
-    observer->onWinchState(state_, cooldownRemainingMs());
+    observer->onWinchState(state_, cooldownTimeRemaining(timer_.elapsed()));
 }
 
-void WinchController::notify() {
+void Winch::notify(const Timer::Duration elapsed) {
+    const auto cooldownTimeRemainingLocal = cooldownTimeRemaining(elapsed);
+
     for (auto* observer : observers_) {
-        observer->onWinchState(state_, cooldownRemainingMs());
+        observer->onWinchState(state_, cooldownTimeRemainingLocal);
     }
 }
 

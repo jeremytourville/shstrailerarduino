@@ -42,6 +42,8 @@ void Button::update() {
             }
 
             notifyReleased();
+        } else {
+            notifyDown();
         }
 
         longPressPending_ = LOW == state_;
@@ -56,10 +58,6 @@ void Button::update() {
         longPressPending_ = false;
 
         notifyLongPressed();
-    }
-
-    if (LOW == state_) {
-        notifyContinuousPress();
     }
 }
 
@@ -83,9 +81,9 @@ void Button::notifyLongPressed() {
     }
 }
 
-void Button::notifyContinuousPress() {
+void Button::notifyDown() {
     for (auto observer : observers_) {
-        observer->onButtonContinuousPress(pin_);
+        observer->onButtonDown(pin_);
     }
 }
 

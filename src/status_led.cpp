@@ -33,8 +33,8 @@ void StatusLED::onHeartBeat() {
 void StatusLED::onWinchState(
     const WinchState state,
     [[maybe_unused]] const Timer::Duration cooldownTimeRemaining) {
-    // very fast blink for fault
-    if (WinchState::FAULT == state) {
+    // very fast blink for cooling down
+    if (WinchState::COOLING_DOWN == state) {
         winchDelay_ = 100UL;
     } else {
         winchDelay_ = ULONG_MAX;

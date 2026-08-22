@@ -1,8 +1,6 @@
 #pragma once
 
-#include <stdint.h>
-
-#include "config.h"
+#include <Arduino.h>
 
 namespace shstrailer {
 

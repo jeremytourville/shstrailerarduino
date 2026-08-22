@@ -48,7 +48,6 @@ class Screen : public BatteryObserver,
 
     DIYables_OLED_SSD1309 display_;
     bool initialized_ = false;
-    bool available_ = false;
     char versionString_[kVersionBufferSize];
 
     // 7 comes from sign, two digits, decimal point, two digits, null terminator

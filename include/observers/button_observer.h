@@ -16,9 +16,9 @@ class ButtonObserver {
     // been held down for a certain duration.
     virtual void onButtonLongPressed([[maybe_unused]] uint8_t pin) {};
 
-    // This is a continuous button press event. It is triggered repeatedly while
-    // the button is held down.
-    virtual void onButtonContinuousPress([[maybe_unused]] uint8_t pin) {};
+    // This is a button down event. It is triggered when the button is pressed
+    // immediately.
+    virtual void onButtonDown([[maybe_unused]] uint8_t pin) {};
 
     // This is a button release event. It is triggered when the button is
     // released after being pressed.
