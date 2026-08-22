@@ -95,10 +95,18 @@ void Winch::onButtonDown(const uint8_t pin) {
     // momentary rocker.
     switch (pin) {
         case WINCH_UP_SW:
-            requested_ = WinchDirection::UP;
+            // ignore if does not match state
+            if (WinchState::RUNNING_DOWN != state_) {
+                requested_ = WinchDirection::UP;
+            }
+
             break;
         case WINCH_DN_SW:
-            requested_ = WinchDirection::DOWN;
+            // ignore if does not match state
+            if (WinchState::RUNNING_UP != state_) {
+                requested_ = WinchDirection::DOWN;
+            }
+
             break;
     }
 }
@@ -125,10 +133,9 @@ void Winch::setState(const WinchState state, const Timer::Duration elapsed) {
         // This would be IDLE or COOLING_DOWN
         digitalWrite(WINCH_UP_OUT, LOW);
         digitalWrite(WINCH_DN_OUT, LOW);
-        requested_ = WinchDirection::STOP;
     }
 
-    // Always restart the timer even though for IDLE it isnt used.
+    // Always restart the timer even though for IDLE it isn't used.
     timer_.start();
 
     state_ = state;
