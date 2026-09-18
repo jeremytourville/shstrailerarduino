@@ -1,8 +1,8 @@
 #include "winch.h"
 
-#include "abort.h"
 #include "algorithm.h"
 #include "console.h"
+#include "halt.h"
 #include "pins.h"
 
 namespace shstrailer {
@@ -37,9 +37,6 @@ void Winch::update() {
     //
 
     const auto elapsed = timer_.elapsed();
-
-    // cout << F("elapsed: ") << elapsed << F(" requested: ") << int(requested_)
-    //    << endl;
 
     switch (state_) {
         case WinchState::IDLE:
@@ -145,7 +142,7 @@ void Winch::setState(const WinchState state, const Timer::Duration elapsed) {
 
 void Winch::registerObserver(WinchObserver* observer) {
     if (nullptr == observer) {
-        Abort(F("winch observer nullptr"));
+        Halt(F("winch observer nullptr"));
     }
 
     observers_.push_back(observer);

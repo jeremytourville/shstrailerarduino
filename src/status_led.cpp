@@ -41,15 +41,6 @@ void StatusLED::onWinchState(
     }
 }
 
-void StatusLED::onBatteryState(const BatteryState state) {
-    // fast blink for critical battery
-    if (BatteryState::CRITICAL == state) {
-        batteryDelay_ = 250UL;
-    } else {
-        batteryDelay_ = ULONG_MAX;
-    }
-}
-
 void StatusLED::toggle() {
     state_ = HIGH == state_ ? LOW : HIGH;
     digitalWrite(STATUS_LED, state_);

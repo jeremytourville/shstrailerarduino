@@ -4,6 +4,6 @@
 
 namespace shstrailer {
 
-void Abort(const __FlashStringHelper* const message);
+void Halt(const __FlashStringHelper* const message);
 
 }  // namespace shstrailer

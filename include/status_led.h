@@ -3,16 +3,13 @@
 #include <Arduino.h>
 #include <limits.h>
 
-#include "observers/battery_observer.h"
 #include "observers/heartbeat_observer.h"
 #include "observers/winch_observer.h"
 #include "timer.h"
 
 namespace shstrailer {
 
-class StatusLED : public HeartBeatObserver,
-                  public WinchObserver,
-                  public BatteryObserver {
+class StatusLED : public HeartBeatObserver, public WinchObserver {
    public:
     void update();
 
@@ -20,8 +17,6 @@ class StatusLED : public HeartBeatObserver,
 
     void onWinchState(WinchState state,
                       Timer::Duration cooldownTimeRemaining) override;
-
-    void onBatteryState(BatteryState state) override;
 
    private:
     void toggle();

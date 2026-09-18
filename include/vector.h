@@ -2,8 +2,8 @@
 
 #include <stdint.h>
 
-#include "abort.h"
 #include "forward.h"
+#include "halt.h"
 #include "object_allocator.h"
 
 namespace shstrailer {
@@ -121,7 +121,7 @@ class Vector {
 
     [[nodiscard]] const_reference at(const uint16_t index) const {
         if (index >= size_) {
-            Abort(F("Vector index out of bounds"));
+            Halt(F("Vector index out of bounds"));
         }
 
         return *data_[index];
@@ -205,7 +205,7 @@ class Vector {
    private:
     void AbortIfOverflow() {
         if (N == size_) {
-            Abort(F("Vector capacity exceeded"));
+            Halt(F("Vector capacity exceeded"));
         }
     }
 
@@ -305,7 +305,7 @@ class Vector<T*, N> {
 
     [[nodiscard]] const_reference at(const uint16_t index) const {
         if (index >= size_) {
-            Abort(F("Vector index out of bounds"));
+            Halt(F("Vector index out of bounds"));
         }
 
         return data_[index];
@@ -376,7 +376,7 @@ class Vector<T*, N> {
    private:
     void AbortIfOverflow() {
         if (N == size_) {
-            Abort(F("Vector capacity exceeded"));
+            Halt(F("Vector capacity exceeded"));
         }
     }
 

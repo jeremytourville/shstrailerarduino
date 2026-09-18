@@ -1,14 +1,11 @@
 #include <Arduino.h>
 #include <avr/wdt.h>
 
-#include "avr_battery_reader.h"
-#include "battery.h"
 #include "button.h"
 #include "console.h"
 #include "frame_rate_monitor.h"
 #include "heartbeat.h"
 #include "light_controller.h"
-#include "mock_battery_reader.h"
 #include "pins.h"
 #include "screen.h"
 #include "status_led.h"
@@ -28,9 +25,6 @@ Vector<Button, 12> allButtons;
 //
 LightController lightController;
 Winch winch;
-AVRBatteryReader batteryReader;
-// MockBatteryReader batteryReader;
-Battery battery(batteryReader);
 HeartBeat heartBeat;
 StatusLED statusLED;
 
@@ -46,40 +40,46 @@ void initializeLights(LightController& lightControllerLocal) {
     lightControllerLocal.registerLight(POD_LIGHT_OUT);
 }
 
-void initializeButtons(LightController& lightControllerLocal,
-                       Winch& winchLocal) {
+void initializeButtonsAndObservers(LightController& lightControllerLocal,
+                                   Winch& winchLocal) {
     // map buttons to lights
     Light* light1 = lightControllerLocal.getLightByPin(LIGHT1_OUT);
     allButtons.emplace_back(L1_SW_A);
     allButtons.back().registerObserver(light1);
     allButtons.emplace_back(L1_SW_B);
     allButtons.back().registerObserver(light1);
+    light1->registerObserver(&screen);
 
     Light* light2 = lightControllerLocal.getLightByPin(LIGHT2_OUT);
     allButtons.emplace_back(L2_SW_A);
     allButtons.back().registerObserver(light2);
     allButtons.emplace_back(L2_SW_B);
     allButtons.back().registerObserver(light2);
+    light2->registerObserver(&screen);
 
     Light* light3 = lightControllerLocal.getLightByPin(LIGHT3_OUT);
     allButtons.emplace_back(L3_SW_A);
     allButtons.back().registerObserver(light3);
     allButtons.emplace_back(L3_SW_B);
     allButtons.back().registerObserver(light3);
+    light3->registerObserver(&screen);
 
     Light* light4 = lightControllerLocal.getLightByPin(LIGHT4_OUT);
     allButtons.emplace_back(L4_SW_A);
     allButtons.back().registerObserver(light4);
     allButtons.emplace_back(L4_SW_B);
     allButtons.back().registerObserver(light4);
+    light4->registerObserver(&screen);
 
     Light* ledStrip = lightControllerLocal.getLightByPin(LED_STRIP_OUT);
     allButtons.emplace_back(LED_STRIP_SW);
     allButtons.back().registerObserver(ledStrip);
+    ledStrip->registerObserver(&screen);
 
     Light* podLight = lightControllerLocal.getLightByPin(POD_LIGHT_OUT);
     allButtons.emplace_back(POD_LIGHT_SW);
     allButtons.back().registerObserver(podLight);
+    podLight->registerObserver(&screen);
 
     // Register the light controller to turn off all lights on long press,
     // exclude winch buttons by registering them after this loop.
@@ -106,16 +106,17 @@ void setup() {
 
     initializeLights(lightController);
 
-    initializeButtons(lightController, winch);
-
-    battery.registerObserver(&screen);
-    battery.registerObserver(&statusLED);
+    initializeButtonsAndObservers(lightController, winch);
 
     heartBeat.registerObserver(&screen);
     heartBeat.registerObserver(&statusLED);
 
     winch.registerObserver(&screen);
     winch.registerObserver(&statusLED);
+
+    // set tubivator pin always on
+    pinMode(TUBIVATOR_OUT, OUTPUT);
+    digitalWrite(TUBIVATOR_OUT, HIGH);
 
     cout << F("System Ready") << endl;
 }
@@ -129,7 +130,6 @@ void loop() {
     }
 
     winch.update();
-    battery.update();
     heartBeat.update();
     statusLED.update();
     screen.update();

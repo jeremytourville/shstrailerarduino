@@ -3,23 +3,21 @@
 #include <DIYables_OLED_SSD1309.h>
 #include <stdint.h>
 
-#include "observers/battery_observer.h"
 #include "observers/heartbeat_observer.h"
+#include "observers/light_observer.h"
 #include "observers/winch_observer.h"
 #include "timer.h"
 #include "version.h"
 
 namespace shstrailer {
 
-class Screen : public BatteryObserver,
+class Screen : public LightObserver,
                public WinchObserver,
                public HeartBeatObserver {
    public:
     Screen();
 
-    void onBatteryVoltage(float voltage) override;
-
-    void onBatteryState(BatteryState state) override;
+    void onLightState(uint8_t pin, uint8_t state) override;
 
     void onWinchState(WinchState state,
                       Timer::Duration cooldownTimeRemaining) override;
@@ -31,14 +29,10 @@ class Screen : public BatteryObserver,
    private:
     [[nodiscard]] bool initialize();
 
-    [[nodiscard]] const char* voltageToString();
-
     void drawText(int16_t x, int16_t y, const char* text, uint8_t textSize = 1,
                   uint16_t color = SSD1309_PIXEL_ON);
 
-    void drawBattery(int16_t x, int16_t y);
-
-    void drawBatteryGroup();
+    void drawLightsGroup();
 
     void drawWinchGroup();
 
@@ -56,12 +50,17 @@ class Screen : public BatteryObserver,
     int16_t bottomHLineY_ = 0;
     int16_t versionX_ = 0;
     int16_t versionY_ = 0;
-    BatteryState batteryState_ = BatteryState::OK;
-    float batteryVoltage_ = 0.0f;
     bool drawHeartbeat_ = false;
     WinchState winchState_ = WinchState::IDLE;
     Timer::Duration winchCooldownTimeRemaining_ = 0;
     Timer timer_;
+    static constexpr int8_t kLight1Mask = 0x01;
+    static constexpr int8_t kLight2Mask = 0x02;
+    static constexpr int8_t kLight3Mask = 0x04;
+    static constexpr int8_t kLight4Mask = 0x08;
+    static constexpr int8_t kDualPodLightsMask = 0x10;
+    static constexpr int8_t kLEDStripLightMask = 0x20;
+    int8_t lightStates_ = 0;
 };
 
 }  // namespace shstrailer

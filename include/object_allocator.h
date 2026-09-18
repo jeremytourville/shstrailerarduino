@@ -4,8 +4,8 @@
 
 #include <new>
 
-#include "abort.h"
 #include "forward.h"
+#include "halt.h"
 
 namespace shstrailer {
 
@@ -39,7 +39,7 @@ class ObjectAllocator {
    private:
     void AbortIfOverflow() {
         if (allocatedCount_ >= N) {
-            Abort(F("ObjectAllocator overflow"));
+            Halt(F("ObjectAllocator overflow"));
         }
     }
 

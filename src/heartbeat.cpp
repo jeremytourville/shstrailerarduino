@@ -1,6 +1,6 @@
 #include "heartbeat.h"
 
-#include "abort.h"
+#include "halt.h"
 #include "observers/heartbeat_observer.h"
 
 namespace shstrailer {
@@ -9,7 +9,7 @@ HeartBeat::HeartBeat(const Timer::Duration duration) : duration_(duration) {}
 
 void HeartBeat::registerObserver(HeartBeatObserver* observer) {
     if (nullptr == observer) {
-        Abort(F("heartbeat observer nullptr"));
+        Halt(F("heartbeat observer nullptr"));
     }
 
     observers_.push_back(observer);
