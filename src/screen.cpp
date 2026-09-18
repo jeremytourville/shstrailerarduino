@@ -5,6 +5,7 @@
 
 #include "algorithm.h"
 #include "console.h"
+#include "pins.h"
 
 namespace shstrailer {
 
@@ -29,12 +30,35 @@ Screen::Screen() : display_(128, 64) {
     snprintf(versionString_, sizeof(versionString_), "%s", GetVersionString());
 }
 
-void Screen::onBatteryVoltage(const float voltage) {
-    batteryVoltage_ = voltage;
-}
+void Screen::onLightState(const uint8_t pin, const uint8_t state) {
+    uint8_t lightMask = 0;
 
-void Screen::onBatteryState([[maybe_unused]] const BatteryState state) {
-    batteryState_ = state;
+    switch (pin) {
+        case LIGHT1_OUT:
+            lightMask = kLight1Mask;
+            break;
+        case LIGHT2_OUT:
+            lightMask = kLight2Mask;
+            break;
+        case LIGHT3_OUT:
+            lightMask = kLight3Mask;
+            break;
+        case LIGHT4_OUT:
+            lightMask = kLight4Mask;
+            break;
+        case POD_LIGHT_OUT:
+            lightMask = kDualPodLightsMask;
+            break;
+        case LED_STRIP_OUT:
+            lightMask = kLEDStripLightMask;
+            break;
+    }
+
+    if (HIGH == state) {
+        lightStates_ |= lightMask;
+    } else {
+        lightStates_ &= ~lightMask;
+    }
 }
 
 void Screen::onWinchState(const WinchState state,
@@ -58,7 +82,7 @@ void Screen::update() {
     timer_.start();
     display_.clearDisplay();
 
-    drawBatteryGroup();
+    drawLightsGroup();
 
     drawWinchGroup();
 
@@ -67,43 +91,80 @@ void Screen::update() {
     display_.display();
 }
 
-void Screen::drawBattery(const int16_t x, const int16_t y) {
-    if (BatteryState::OK == batteryState_ ||
-        (BatteryState::CRITICAL == batteryState_ && !drawHeartbeat_)) {
-        return;
-    }
-
-    // body
-    display_.drawRect(x, y + 1, 32, 16, SSD1309_PIXEL_ON);
-
-    // negative terminal
-    display_.drawFastHLine(x + 5, y, 5, SSD1309_PIXEL_ON);
-
-    // positive terminal
-    display_.drawFastHLine(x + 22, y, 5, SSD1309_PIXEL_ON);
-
-    // negative sign
-    display_.drawFastHLine(x + 5, y + 8, 5, SSD1309_PIXEL_ON);
-
-    // positive sign
-    display_.drawFastHLine(x + 22, y + 8, 5, SSD1309_PIXEL_ON);
-    display_.drawFastVLine(x + 24, y + 6, 5, SSD1309_PIXEL_ON);
-}
-
-void Screen::drawBatteryGroup() {
+void Screen::drawLightsGroup() {
     display_.drawRoundRect(0, 0, 128, 26, 3, SSD1309_PIXEL_ON);
-    display_.fillRoundRect(6, 0, 45, 9, 2, SSD1309_PIXEL_ON);
+    display_.fillRoundRect(6, 0, 38, 9, 2, SSD1309_PIXEL_ON);
 
-    drawText(8, 1, "BATTERY", 1, SSD1309_PIXEL_OFF);
+    drawText(8, 1, "LIGHTS", 1, SSD1309_PIXEL_OFF);
 
-    constexpr size_t kBufferSize = kVoltageBufferSize + 1;
-    char buffer[kBufferSize];
+    display_.drawRect(46, 3, 80, 20, SSD1309_PIXEL_ON);
 
-    if (snprintf(buffer, sizeof(buffer), "%sV", voltageToString()) > 0) {
-        drawText(4, 10, buffer, 2);
+    // curb side nose door
+    display_.drawRect(46 + 7, 3, 7, 3, SSD1309_PIXEL_ON);
+
+    // curb side middle doors
+    display_.drawRect(46 + 20, 3, 4, 3, SSD1309_PIXEL_ON);
+    display_.drawRect(46 + 23, 3, 4, 3, SSD1309_PIXEL_ON);
+
+    // curb side tail doors
+    display_.drawRect(46 + 54, 3, 4, 3, SSD1309_PIXEL_ON);
+    display_.drawRect(46 + 57, 3, 4, 3, SSD1309_PIXEL_ON);
+
+    // rear doors
+    display_.drawRect(46 + 80 - 3, 3, 3, 10, SSD1309_PIXEL_ON);
+    display_.drawRect(46 + 80 - 3, 13, 3, 10, SSD1309_PIXEL_ON);
+
+    // street side doors
+    display_.drawRect(46 + 35, 20, 7, 3, SSD1309_PIXEL_ON);
+    display_.drawRect(46 + 42, 20, 7, 3, SSD1309_PIXEL_ON);
+
+    // light 1
+    if (lightStates_ & kLight1Mask) {
+        display_.fillCircle(46 + 10, 9, 2, SSD1309_PIXEL_ON);
+    } else {
+        display_.drawCircle(46 + 10, 9, 2, SSD1309_PIXEL_ON);
     }
 
-    drawBattery(91, 4);
+    // light 2
+    if (lightStates_ & kLight2Mask) {
+        display_.fillCircle(46 + 23, 9, 2, SSD1309_PIXEL_ON);
+    } else {
+        display_.drawCircle(46 + 23, 9, 2, SSD1309_PIXEL_ON);
+    }
+
+    // light 3
+    if (lightStates_ & kLight3Mask) {
+        display_.fillCircle(46 + 57, 9, 2, SSD1309_PIXEL_ON);
+    } else {
+        display_.drawCircle(46 + 57, 9, 2, SSD1309_PIXEL_ON);
+    }
+
+    // light 4
+    if (lightStates_ & kLight4Mask) {
+        display_.fillCircle(46 + 30, 18, 2, SSD1309_PIXEL_ON);
+    } else {
+        display_.drawCircle(46 + 30, 18, 2, SSD1309_PIXEL_ON);
+    }
+
+    // dual pod lights
+    if (lightStates_ & kDualPodLightsMask) {
+        display_.fillCircle(46 + 73, 7, 2, SSD1309_PIXEL_ON);
+        display_.fillCircle(46 + 73, 18, 2, SSD1309_PIXEL_ON);
+
+    } else {
+        display_.drawCircle(46 + 73, 7, 2, SSD1309_PIXEL_ON);
+        display_.drawCircle(46 + 73, 18, 2, SSD1309_PIXEL_ON);
+    }
+
+    // led strip light on
+    display_.drawFastHLine(50, 13, 70, SSD1309_PIXEL_ON);
+
+    if (0 == (lightStates_ & kLEDStripLightMask)) {
+        // led strip light off dashed
+        for (int i = 0; i < 70; i += 6) {
+            display_.drawFastHLine(50 + i, 13, 2, SSD1309_PIXEL_OFF);
+        }
+    }
 }
 
 void Screen::drawWinchGroup() {
@@ -195,14 +256,6 @@ bool Screen::initialize() {
     }
 
     return initialized_;
-}
-
-const char* Screen::voltageToString() {
-    constexpr float kVoltageRange = 99.99f;
-
-    // Keep voltage in a range so the buffer boundary isnt violated.
-    return dtostrf(clamp(batteryVoltage_, -kVoltageRange, kVoltageRange),
-                   kVoltageBufferSize - 1, 2, voltageString_);
 }
 
 }  // namespace shstrailer

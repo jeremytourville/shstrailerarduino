@@ -3,6 +3,8 @@
 #include <Arduino.h>
 
 #include "observers/button_observer.h"
+#include "observers/light_observer.h"
+#include "vector.h"
 
 namespace shstrailer {
 
@@ -18,9 +20,14 @@ class Light : public ButtonObserver {
 
     [[nodiscard]] uint8_t getPin() const;
 
+    void registerObserver(LightObserver* observer);
+
    private:
     void write(uint8_t newState);
 
+    void notify();
+
+    Vector<LightObserver*, 2> observers_;
     const uint8_t pin_;
     uint8_t state_ = LOW;
 };

@@ -25,7 +25,7 @@ Light* LightController::getLightByPin(const uint8_t pin) {
         }
     }
 
-    Abort(F("light not registered for pin"));
+    Halt(F("light not registered for pin"));
 
     return nullptr;
 }

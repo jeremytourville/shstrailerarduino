@@ -1,6 +1,6 @@
 #include "button.h"
 
-#include "abort.h"
+#include "halt.h"
 #include "observers/button_observer.h"
 
 namespace shstrailer {
@@ -63,7 +63,7 @@ void Button::update() {
 
 void Button::registerObserver(ButtonObserver* observer) {
     if (nullptr == observer) {
-        Abort(F("button observer nullptr"));
+        Halt(F("button observer nullptr"));
     }
 
     observers_.push_back(observer);

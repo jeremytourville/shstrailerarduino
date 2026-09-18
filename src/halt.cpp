@@ -1,11 +1,11 @@
-#include "abort.h"
+#include "halt.h"
 
 #include "console.h"
 #include "pins.h"
 
 namespace shstrailer {
 
-void Abort(const __FlashStringHelper* const message) {
+void Halt(const __FlashStringHelper* const message) {
     pinMode(STATUS_LED, OUTPUT);
 
     cout << endl << F("FATAL: ") << message << endl;

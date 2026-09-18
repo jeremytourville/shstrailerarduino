@@ -29,7 +29,6 @@ constexpr uint8_t LED_STRIP_OUT = 38;
 constexpr uint8_t POD_LIGHT_OUT = 39;
 constexpr uint8_t WINCH_UP_OUT = 40;
 constexpr uint8_t WINCH_DN_OUT = 41;
-
-constexpr uint8_t BATTERY_VOLTAGE_PIN = A0;
+constexpr uint8_t TUBIVATOR_OUT = 42;
 
 }  // namespace shstrailer
