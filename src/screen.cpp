@@ -21,8 +21,9 @@ const uint8_t kHeartBitmap[] PROGMEM = {
     0x00   // 00000000 -> . . . . . . . (Row 7 - Bottom Spacing)
 };
 
-constexpr Timer::Duration kFrameDuration = 250;
-constexpr Timer::Duration kInitRetryDuration = 1000;
+constexpr Timer::Duration kFrameDuration = 250UL;
+constexpr Timer::Duration kDimDuration = 1000UL * 60UL * 10UL;  // 10 minutes
+constexpr Timer::Duration kInitRetryDuration = 1000UL;
 
 }  // namespace
 
@@ -59,15 +60,21 @@ void Screen::onLightState(const uint8_t pin, const uint8_t state) {
     } else {
         lightStates_ &= ~lightMask;
     }
+
+    undim();
 }
 
 void Screen::onWinchState(const WinchState state,
                           const Timer::Duration cooldownTimeRemaining) {
     winchState_ = state;
     winchCooldownTimeRemaining_ = cooldownTimeRemaining;
+
+    undim();
 }
 
 void Screen::onHeartBeat() { drawHeartbeat_ = !drawHeartbeat_; }
+
+void Screen::onButtonDown([[maybe_unused]] const uint8_t pin) { undim(); }
 
 void Screen::update() {
     if (!initialize()) {
@@ -77,6 +84,12 @@ void Screen::update() {
     // Do not draw every frame, saves power.
     if (timer_.elapsed() < kFrameDuration) {
         return;
+    }
+
+    if (!isDim_ && dimTimer_.elapsed() >= kDimDuration) {
+        cout << "going dim" << endl;
+        isDim_ = true;
+        display_.dim(isDim_);
     }
 
     timer_.start();
@@ -233,6 +246,12 @@ bool Screen::initialize() {
         return true;
     }
 
+    if (!timersInitialized_) {
+        timersInitialized_ = true;
+        timer_.start();
+        dimTimer_.start();
+    }
+
     // keep trying to connect to the screen
     if (timer_.elapsed() < kInitRetryDuration) {
         return false;
@@ -241,8 +260,6 @@ bool Screen::initialize() {
     timer_.start();
 
     if (display_.begin()) {
-        timer_.start();
-
         int16_t junk = 0;
         uint16_t width;
         uint16_t height;
@@ -256,6 +273,16 @@ bool Screen::initialize() {
     }
 
     return initialized_;
+}
+
+void Screen::undim() {
+    dimTimer_.start();
+
+    if (isDim_) {
+        isDim_ = false;
+        display_.dim(isDim_);
+        cout << "going undim" << endl;
+    }
 }
 
 }  // namespace shstrailer

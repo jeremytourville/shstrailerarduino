@@ -40,58 +40,62 @@ void initializeLights(LightController& lightControllerLocal) {
     lightControllerLocal.registerLight(POD_LIGHT_OUT);
 }
 
-void initializeButtonsAndObservers(LightController& lightControllerLocal,
-                                   Winch& winchLocal) {
+void initializeButtonsAndObservers() {
     // map buttons to lights
-    Light* light1 = lightControllerLocal.getLightByPin(LIGHT1_OUT);
+    Light* light1 = lightController.getLightByPin(LIGHT1_OUT);
     allButtons.emplace_back(L1_SW_A);
     allButtons.back().registerObserver(light1);
     allButtons.emplace_back(L1_SW_B);
     allButtons.back().registerObserver(light1);
     light1->registerObserver(&screen);
 
-    Light* light2 = lightControllerLocal.getLightByPin(LIGHT2_OUT);
+    Light* light2 = lightController.getLightByPin(LIGHT2_OUT);
     allButtons.emplace_back(L2_SW_A);
     allButtons.back().registerObserver(light2);
     allButtons.emplace_back(L2_SW_B);
     allButtons.back().registerObserver(light2);
     light2->registerObserver(&screen);
 
-    Light* light3 = lightControllerLocal.getLightByPin(LIGHT3_OUT);
+    Light* light3 = lightController.getLightByPin(LIGHT3_OUT);
     allButtons.emplace_back(L3_SW_A);
     allButtons.back().registerObserver(light3);
     allButtons.emplace_back(L3_SW_B);
     allButtons.back().registerObserver(light3);
     light3->registerObserver(&screen);
 
-    Light* light4 = lightControllerLocal.getLightByPin(LIGHT4_OUT);
+    Light* light4 = lightController.getLightByPin(LIGHT4_OUT);
     allButtons.emplace_back(L4_SW_A);
     allButtons.back().registerObserver(light4);
     allButtons.emplace_back(L4_SW_B);
     allButtons.back().registerObserver(light4);
     light4->registerObserver(&screen);
 
-    Light* ledStrip = lightControllerLocal.getLightByPin(LED_STRIP_OUT);
+    Light* ledStrip = lightController.getLightByPin(LED_STRIP_OUT);
     allButtons.emplace_back(LED_STRIP_SW);
     allButtons.back().registerObserver(ledStrip);
     ledStrip->registerObserver(&screen);
 
-    Light* podLight = lightControllerLocal.getLightByPin(POD_LIGHT_OUT);
+    Light* podLight = lightController.getLightByPin(POD_LIGHT_OUT);
     allButtons.emplace_back(POD_LIGHT_SW);
     allButtons.back().registerObserver(podLight);
     podLight->registerObserver(&screen);
 
     // Register the light controller to turn off all lights on long press,
-    // exclude winch buttons by registering them after this loop.
+    // exclude winch buttons by registering winch buttons after this loop.
     for (auto& button : allButtons) {
-        button.registerObserver(&lightControllerLocal);
+        button.registerObserver(&lightController);
     }
 
     allButtons.emplace_back(WINCH_UP_SW);
-    allButtons.back().registerObserver(&winchLocal);
+    allButtons.back().registerObserver(&winch);
 
     allButtons.emplace_back(WINCH_DN_SW);
-    allButtons.back().registerObserver(&winchLocal);
+    allButtons.back().registerObserver(&winch);
+
+    // Screen listens to all buttons including winch buttons.
+    for (auto& button : allButtons) {
+        button.registerObserver(&screen);
+    }
 }
 
 void setup() {
@@ -106,7 +110,7 @@ void setup() {
 
     initializeLights(lightController);
 
-    initializeButtonsAndObservers(lightController, winch);
+    initializeButtonsAndObservers();
 
     heartBeat.registerObserver(&screen);
     heartBeat.registerObserver(&statusLED);
