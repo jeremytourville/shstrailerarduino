@@ -3,6 +3,7 @@
 #include <DIYables_OLED_SSD1309.h>
 #include <stdint.h>
 
+#include "observers/button_observer.h"
 #include "observers/heartbeat_observer.h"
 #include "observers/light_observer.h"
 #include "observers/winch_observer.h"
@@ -13,6 +14,7 @@ namespace shstrailer {
 
 class Screen : public LightObserver,
                public WinchObserver,
+               public ButtonObserver,
                public HeartBeatObserver {
    public:
     Screen();
@@ -23,6 +25,8 @@ class Screen : public LightObserver,
                       Timer::Duration cooldownTimeRemaining) override;
 
     void onHeartBeat() override;
+
+    void onButtonDown(uint8_t pin) override;
 
     void update();
 
@@ -39,6 +43,8 @@ class Screen : public LightObserver,
     void drawCoolDownTimeRemaining();
 
     void drawStatusBar();
+
+    void undim();
 
     DIYables_OLED_SSD1309 display_;
     bool initialized_ = false;
@@ -61,6 +67,9 @@ class Screen : public LightObserver,
     static constexpr int8_t kDualPodLightsMask = 0x10;
     static constexpr int8_t kLEDStripLightMask = 0x20;
     int8_t lightStates_ = 0;
+    Timer dimTimer_;
+    bool isDim_ = false;
+    bool timersInitialized_ = false;
 };
 
 }  // namespace shstrailer
