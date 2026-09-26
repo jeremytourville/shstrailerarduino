@@ -87,7 +87,6 @@ void Screen::update() {
     }
 
     if (!isDim_ && dimTimer_.elapsed() >= kDimDuration) {
-        cout << "going dim" << endl;
         isDim_ = true;
         display_.dim(isDim_);
     }
@@ -281,7 +280,6 @@ void Screen::undim() {
     if (isDim_) {
         isDim_ = false;
         display_.dim(isDim_);
-        cout << "going undim" << endl;
     }
 }
 
